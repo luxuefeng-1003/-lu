@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>运势分享消息</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#1a1a2e;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+  padding:20px;
+}
+
+/* 聊天消息容器 */
+.chat-container {
+  width:100%;
+  max-width:360px;
+}
+
+/* 发送者头像 */
+.message-row {
+  display:flex; gap:10px; margin-bottom:16px;
+}
+.message-row.reverse {
+  flex-direction:row-reverse;
+}
+.avatar {
+  width:36px; height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg, #667eea, #764ba2);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.avatar svg { width:20px; height:20px; }
+
+/* 消息气泡 */
+.message-bubble {
+  max-width:260px;
+  padding:0;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+/* 运势分享卡片 */
+.fortune-card {
+  background:linear-gradient(135deg, #1a0a40 0%, #2d1b5e 100%);
+  border-radius:12px;
+  overflow:hidden;
+}
+
+/* 卡片头部 */
+.card-header {
+  padding:12px 14px;
+  display:flex; align-items:center; gap:8px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.card-tag {
+  font-size:10px; color:#a78bfa;
+  background:rgba(167,139,250,0.15);
+  padding:2px 8px; border-radius:10px;
+}
+.card-source {
+  font-size:10px; color:rgba(255,255,255,0.4);
+}
+
+/* 卡片内容 */
+.card-content {
+  padding:14px;
+}
+
+/* 顶部用户信息 */
+.card-user {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:10px;
+}
+.card-avatar {
+  width:28px; height:28px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  display:flex; align-items:center; justify-content:center;
+}
+.card-avatar svg { width:16px; height:16px; }
+.card-name {
+  font-size:12px; color:rgba(255,255,255,0.7);
+}
+
+/* 运势徽章 */
+.card-badge {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:12px;
+}
+.badge-icon {
+  width:48px; height:48px;
+  background:linear-gradient(135deg, rgba(167,139,250,0.3), rgba(124,58,237,0.2));
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px;
+}
+.badge-info { flex:1; }
+.badge-score {
+  font-size:24px; font-weight:800;
+  background:linear-gradient(135deg,#fff,#fde68a);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.badge-stars { font-size:12px; color:#fde68a; letter-spacing:1px; }
+.badge-label { font-size:10px; color:rgba(255,255,255,0.5); }
+
+/* 维度分数 */
+.card-dimensions {
+  display:flex; gap:8px; margin-bottom:10px;
+}
+.dim-item {
+  flex:1;
+  background:rgba(255,255,255,0.05);
+  border-radius:8px;
+  padding:6px 8px;
+  text-align:center;
+}
+.dim-label { font-size:9px; color:rgba(255,255,255,0.4); }
+.dim-score { font-size:14px; font-weight:700; color:#fff; }
+.dim-love { color:#f87171; }
+.dim-career { color:#60a5fa; }
+.dim-wealth { color:#34d399; }
+
+/* 寄语 */
+.card-quote {
+  font-size:11px; color:rgba(255,255,255,0.6);
+  line-height:1.6;
+  padding:8px 10px;
+  background:rgba(255,255,255,0.03);
+  border-radius:8px;
+  border-left:2px solid #a78bfa;
+}
+
+/* 底部提示 */
+.card-footer {
+  padding:8px 14px;
+  background:rgba(0,0,0,0.2);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.footer-text {
+  font-size:10px; color:rgba(255,255,255,0.4);
+}
+.footer-btn {
+  font-size:10px; color:#a78bfa;
+  background:none; border:none;
+  cursor:pointer;
+}
+
+/* 发送时间 */
+.message-time {
+  font-size:10px; color:rgba(255,255,255,0.3);
+  margin-top:4px;
+}
+.message-row.reverse .message-time {
+  text-align:right;
+}
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+
+  <!-- 对方发送的运势分享消息 -->
+  <div class="message-row">
+    <div class="avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+    </div>
+    <div>
+      <div class="message-bubble">
+        <div class="fortune-card">
+          <div class="card-header">
+            <span class="card-tag">今日运势</span>
+            <span class="card-source">生日测算</span>
+          </div>
+          <div class="card-content">
+            <div class="card-user">
+              <div class="card-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+              </div>
+              <span class="card-name">小鹿</span>
+            </div>
+            <div class="card-badge">
+              <div class="badge-icon">⭐</div>
+              <div class="badge-info">
+                <div class="badge-score">92</div>
+                <div class="badge-stars">★★★★☆</div>
+                <div class="badge-label">综合运势</div>
+              </div>
+            </div>
+            <div class="card-dimensions">
+              <div class="dim-item">
+                <div class="dim-label">爱情运</div>
+                <div class="dim-score dim-love">100</div>
+              </div>
+              <div class="dim-item">
+                <div class="dim-label">学业/事业</div>
+                <div class="dim-score dim-career">82</div>
+              </div>
+              <div class="dim-item">
+                <div class="dim-label">财富运</div>
+                <div class="dim-score dim-wealth">91</div>
+              </div>
+            </div>
+            <div class="card-quote">
+              今天运势超级好，好运连连！保持好奇心，温柔的对待自己和身边的人。
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="footer-text">白羊座 · 5月11日</span>
+            <button class="footer-btn">我也测一测 →</button>
+          </div>
+        </div>
+      </div>
+      <div class="message-time">10:23</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Screen 01 - 拍摄页</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#000;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+/* ── 手机外壳 ── */
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+}
+
+/* ── 背景：真实照片 ── */
+.bg {
+  position:absolute; inset:0; z-index:0;
+  background: url('https://bs3-hb1.corp.kuaishou.com/upload-kwaipilot-chat-file/chat/2026-05-10/8df3c6b6922b4a3ea36173e850aa6829.jpg') center/cover no-repeat;
+}
+
+/* 轻微的胶片颗粒纹理 */
+.bg::after {
+  content:'';
+  position:absolute; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.5; pointer-events:none;
+}
+
+/* 真实照片不需要模拟高光斑，保留一层微暗角增强氛围 */
+.hair-highlight {
+  position:absolute; z-index:1; inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 50%, rgba(0,0,0,0.3) 100%);
+  pointer-events:none;
+}
+
+/* ─────────────────── UI 层 ─────────────────── */
+
+/* 状态栏 */
+.status-bar {
+  position:absolute; top:0; left:0; right:0;
+  height:50px; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 26px 0;
+}
+.s-time { font-size:15px; font-weight:600; color:#fff; letter-spacing:0.2px; }
+.s-icons { display:flex; align-items:center; gap:5px; }
+
+/* 信号格 */
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:#fff; border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;}
+.sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+
+/* WiFi */
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:#fff; border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid #fff; border-bottom:none; border-radius:8px 8px 0 0; }
+
+/* 电池 */
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.88); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.7); border-radius:0 1px 1px 0; }
+.bat-fill { background:#fff; border-radius:1px; height:100%; width:82%; }
+
+/* 顶部操作栏 */
+.top-bar {
+  position:absolute; top:50px; left:0; right:0;
+  height:50px; z-index:20;
+  display:flex; align-items:center; justify-content:center;
+}
+.close-btn {
+  position:absolute; left:18px;
+  width:34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:19px; font-weight:300;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  cursor:pointer;
+}
+.music-pill {
+  display:flex; align-items:center; gap:5px;
+  background:rgba(0,0,0,0.52);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-radius:20px;
+  padding:7px 18px;
+  color:#fff; font-size:13px; font-weight:500;
+}
+
+/* 右侧工具栏 */
+.right-bar {
+  position:absolute; top:108px; right:12px;
+  display:flex; flex-direction:column;
+  align-items:center; gap:4px;
+  z-index:20;
+}
+.tool { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+.tool-circle {
+  width:46px; height:46px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+.tool-circle svg { display:block; }
+.tool-txt { font-size:10px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.7); }
+
+/* 运势图标：和其他工具一致，白色 SVG */
+.fortune-badge {
+  position:absolute; top:-2px; right:-2px;
+  width:14px; height:14px;
+  background:linear-gradient(135deg,#ff6b6b,#c0102e);
+  border-radius:50%;
+  border:1.5px solid #fff;
+  font-size:7px; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+}
+
+/* ── 运势气泡提醒（磨砂透明胶囊，向左飞出，不影响工具栏列宽度） ── */
+.tool-fortune {
+  position:relative;
+}
+.fortune-bubble {
+  position:absolute;
+  top:50%;
+  right:100%;        /* 左边界贴着icon左侧 */
+  transform:translateY(-50%);
+  margin-right:6px;  /* 与icon保持小间距 */
+  z-index:25;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 12px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.15);
+  box-shadow:0 4px 20px rgba(255,255,255,0.08);
+  cursor:pointer;
+  animation:bubbleFloat 2.8s ease-in-out infinite;
+  white-space:nowrap;
+  pointer-events:all;
+}
+
+@keyframes bubbleFloat {
+  0%, 100% { transform:translateY(-50%) translateX(0); }
+  50% { transform:translateY(-50%) translateX(-4px); }
+}
+
+.bubble-text-area {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.bubble-title {
+  font-size:13px;
+  font-weight:600;
+  color:#fff;
+  letter-spacing:0.2px;
+}
+
+.bubble-sub {
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-size:11px;
+  color:rgba(255,255,255,0.72);
+}
+
+.bubble-dot {
+  width:7px; height:7px;
+  border-radius:50%;
+  background:#ff3b3b;
+  flex-shrink:0;
+  box-shadow:0 0 0 2px rgba(255,59,59,0.3);
+  animation:dotPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { box-shadow:0 0 0 2px rgba(255,59,59,0.3); }
+  50% { box-shadow:0 0 0 5px rgba(255,59,59,0); }
+}
+
+.expand-dot {
+  width:30px; height:30px;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:2px; cursor:pointer;
+}
+.expand-dot svg { display:block; }
+
+/* 拍摄模式 */
+.mode-row {
+  position:absolute; bottom:196px; left:0; right:0;
+  display:flex; justify-content:center; align-items:center;
+  gap:28px; z-index:20;
+}
+.mode-txt { font-size:15px; color:rgba(255,255,255,0.72); font-weight:400; cursor:pointer; }
+.mode-txt.on {
+  color:#fff; font-weight:600;
+  background:rgba(0,0,0,0.5);
+  padding:5px 16px; border-radius:20px;
+}
+
+/* 拍摄区域 */
+.capture-row {
+  position:absolute; bottom:106px; left:0; right:0;
+  height:88px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; z-index:20;
+}
+
+.thumb-wrap { display:flex; flex-direction:column; align-items:center; gap:0; position:relative; }
+.thumb {
+  width:64px; height:64px; border-radius:16px; overflow:hidden;
+  position:relative;
+}
+.thumb-label {
+  position:absolute; bottom:5px; left:0; right:0;
+  text-align:center; font-size:10.5px; color:#fff;
+  font-weight:500; text-shadow:0 1px 3px rgba(0,0,0,0.7);
+}
+
+/* 魔法缩略图 */
+.magic-thumb {
+  width:100%; height:100%;
+  background:linear-gradient(135deg,#7b4fa6 0%,#4a2f7a 60%,#2a1a50 100%);
+  position:relative;
+}
+.magic-thumb::before {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse 36px 44px at 50% 44%, rgba(210,175,130,0.75) 0%, rgba(170,130,90,0.4) 50%, transparent 75%);
+}
+/* 猫耳朵 */
+.magic-thumb::after {
+  content:'🐱';
+  position:absolute; top:6px; left:50%; transform:translateX(-50%);
+  font-size:20px; line-height:1;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* 相册缩略图 */
+.album-thumb {
+  width:100%; height:100%;
+  background:
+    linear-gradient(180deg, rgba(100,180,120,0.9) 0%, rgba(60,130,80,0.8) 40%, rgba(30,80,50,0.9) 100%),
+    radial-gradient(ellipse 80px 60px at 40% 35%, rgba(180,220,150,0.6) 0%, transparent 60%);
+}
+
+/* 录制按钮 */
+.record-btn {
+  width:80px; height:80px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #ff7070, #e01030 55%, #b80d28);
+  box-shadow:0 0 0 3.5px rgba(255,255,255,0.92), 0 6px 20px rgba(200,10,40,0.5);
+  cursor:pointer; flex-shrink:0;
+}
+
+/* 底部导航 */
+.nav-bar {
+  position:absolute; bottom:0; left:0; right:0;
+  height:100px; z-index:20;
+  background:rgba(0,0,0,0.82);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  display:flex; align-items:flex-start; justify-content:space-around;
+  padding-top:14px;
+}
+.nav-item { display:flex; flex-direction:column; align-items:center; gap:0; cursor:pointer; position:relative; }
+.nav-txt { font-size:14px; color:rgba(255,255,255,0.6); font-weight:400; }
+.nav-item.on .nav-txt { color:#fff; font-weight:600; }
+.nav-dot { width:4px; height:4px; background:#fff; border-radius:50%; margin-top:4px; }
+.live-tag {
+  position:absolute; top:-4px; right:-12px;
+  background:#e8143a; color:#fff;
+  font-size:9px; font-weight:700;
+  padding:1px 5px; border-radius:6px;
+}
+.home-bar {
+  position:absolute; bottom:7px; left:50%; transform:translateX(-50%);
+  width:130px; height:4px;
+  background:rgba(255,255,255,0.35); border-radius:2px;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- 背景层 -->
+  <div class="bg"></div>
+  <div class="hair-highlight"></div>
+
+  <!-- ── 状态栏 ── -->
+  <div class="status-bar">
+    <span class="s-time">09:41</span>
+    <div class="s-icons">
+      <div class="sig"><b></b><b></b><b></b><b></b></div>
+      <div class="wifi"></div>
+      <div class="bat"><div class="bat-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ── 顶部操作栏 ── -->
+  <div class="top-bar">
+    <div class="close-btn">✕</div>
+    <div class="music-pill">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">
+        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      </svg>
+      <span>选择音乐</span>
+    </div>
+  </div>
+
+  <!-- ── 右侧工具栏 ── -->
+  <div class="right-bar">
+
+    <!-- 翻转 -->
+    <div class="tool">
+      <div class="tool-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4v6h6"/><path d="M22 20v-6h-6"/>
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L2 10m20 4-3.64 3.36A9 9 0 0 1 3.51 15"/>
+        </svg>
+      </div>
+      <span class="tool-txt">翻转</span>
+    </div>
+
+    <!-- 录音（红色划线麦克风） -->
+    <div class="tool">
+      <div class="tool-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff3b3b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+          <line x1="3" y1="3" x2="21" y2="21" stroke-width="2"/>
+        </svg>
+      </div>
+      <span class="tool-txt" style="color:#ff3b3b;">录音</span>
+    </div>
+
+    <!-- 倒计时 -->
+    <div class="tool">
+      <div class="tool-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13" r="8"/>
+          <polyline points="12 9 12 13 15 13"/>
+          <line x1="9" y1="2" x2="15" y2="2"/>
+        </svg>
+      </div>
+      <span class="tool-txt">倒计时</span>
+    </div>
+
+    <!-- 运势（icon在工具栏列，气泡向左飞出不占用列宽度） -->
+    <div class="tool tool-fortune" onclick="location.href='0测算方式选择页.html'" style="cursor:pointer;">
+      <!-- 气泡绝对定位向左延伸 -->
+      <div class="fortune-bubble" id="fortuneBubble">
+        <div class="bubble-text-area">
+          <div class="bubble-title">快来查看今日运势</div>
+          <div class="bubble-sub">
+            <span class="bubble-dot"></span>
+            <span>点击查看 ›</span>
+          </div>
+        </div>
+      </div>
+      <!-- 运势icon和文字：和其他工具保持同列 -->
+      <div class="tool-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12,2 14.4,9 22,9 16,14 18.4,21 12,17 5.6,21 8,14 2,9 9.6,9"/>
+        </svg>
+      </div>
+      <span class="tool-txt">运势</span>
+    </div>
+
+    <!-- 灵感 -->
+
+    <!-- 灵感 -->
+    <div class="tool">
+      <div class="tool-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85"/>
+          <path d="M17.93 12.77c.3-1.56.38-3.12.25-4.67"/>
+        </svg>
+      </div>
+      <span class="tool-txt">灵感</span>
+    </div>
+
+    <!-- 展开 -->
+    <div class="expand-dot">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+
+  </div>
+
+  <!-- ── 拍摄模式选择 ── -->
+  <div class="mode-row">
+    <span class="mode-txt">拍照</span>
+    <span class="mode-txt on">视频</span>
+    <span class="mode-txt">文字</span>
+  </div>
+
+  <!-- ── 拍摄控件区 ── -->
+  <div class="capture-row">
+
+    <!-- 魔法 -->
+    <div class="thumb-wrap">
+      <div class="thumb">
+        <div class="magic-thumb"></div>
+        <span class="thumb-label">魔法</span>
+      </div>
+    </div>
+
+    <!-- 录制按钮 -->
+    <div class="record-btn"></div>
+
+    <!-- 相册 -->
+    <div class="thumb-wrap">
+      <div class="thumb">
+        <div class="album-thumb"></div>
+        <span class="thumb-label">相册</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 底部导航 ── -->
+  <div class="nav-bar">
+    <div class="nav-item"><span class="nav-txt">图文</span></div>
+    <div class="nav-item"><span class="nav-txt">多段拍</span></div>
+    <div class="nav-item on">
+      <span class="nav-txt">随手拍</span>
+      <div class="nav-dot"></div>
+    </div>
+    <div class="nav-item"><span class="nav-txt">模版</span></div>
+    <div class="nav-item">
+      <span class="nav-txt" style="position:relative;">
+        开直播
+        <span class="live-tag">直播</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="home-bar"></div>
+
+</div>
+
+</body>
+</html>

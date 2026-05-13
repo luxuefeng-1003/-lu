@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Screen 07 - 分享面板</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#0a0a14;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+/* ── 手机外壳 ── */
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+}
+
+/* ── 背景 ── */
+.page-bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 200% 60% at 50% 0%, #2a0f5e 0%, transparent 60%),
+    radial-gradient(ellipse 100% 40% at 80% 30%, #1a0a40 0%, transparent 50%),
+    linear-gradient(180deg, #0d0620 0%, #10082a 30%, #0a0618 60%, #060412 100%);
+}
+
+/* ── 顶部标题栏 ── */
+.header {
+  position:absolute; top:0; left:0; right:0; z-index:20;
+  padding:60px 20px 16px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg, rgba(8,4,20,0.95) 0%, transparent 100%);
+}
+.header-title {
+  font-size:18px; font-weight:600; color:#fff;
+  letter-spacing:1px;
+}
+.close-btn {
+  position:absolute; top:58px; right:20px;
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.6);
+  cursor:pointer; font-size:22px;
+}
+
+/* ── 内容区 ── */
+.content {
+  position:absolute; inset:0; z-index:10;
+  padding:110px 20px 340px;
+  overflow-y:auto;
+}
+
+/* ── 用户信息 ── */
+.user-info {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:20px;
+}
+.user-avatar {
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+  border:2px solid rgba(167,139,250,0.4);
+  box-shadow:0 0 20px rgba(124,58,237,0.3);
+}
+.user-name {
+  font-size:16px; font-weight:600; color:#fff;
+}
+.user-name span {
+  color:rgba(167,139,250,0.8); font-weight:400;
+}
+
+/* ── 分享卡片容器 ── */
+.share-card {
+  width:100%; aspect-ratio:390/680;
+  border-radius:20px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  margin-bottom:16px;
+}
+
+/* ── 卡片背景 ── */
+.card-bg {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 180% 80% at 50% -10%, #3d1a7a 0%, transparent 60%),
+    radial-gradient(ellipse 100% 50% at 20% 100%, #2a0f5e 0%, transparent 50%),
+    linear-gradient(180deg, #150a30 0%, #0a0520 100%);
+}
+
+/* 星点 */
+.stars {
+  position:absolute; inset:0; overflow:hidden;
+}
+.star {
+  position:absolute; border-radius:50%; background:#fff;
+  animation:twinkle var(--d,3s) var(--dl,0s) infinite ease-in-out alternate;
+}
+@keyframes twinkle {
+  0% { opacity:var(--o1,0.1); transform:scale(0.8); }
+  100% { opacity:var(--o2,0.8); transform:scale(1.2); }
+}
+
+/* ── 模板1：今日运势（星盘环形） ── */
+.template-1 .card-content {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center;
+  padding:28px 20px;
+}
+.template-1 .tag {
+  font-size:11px; color:rgba(167,139,250,0.9);
+  letter-spacing:2px; margin-bottom:12px;
+}
+.template-1 .ring-wrap {
+  width:160px; height:160px; position:relative;
+  margin-bottom:8px;
+}
+.template-1 .ring {
+  position:absolute; inset:0;
+  border:2px solid rgba(167,139,250,0.3);
+  border-radius:50%;
+  animation:ringRotate 20s linear infinite;
+}
+.template-1 .ring::before {
+  content:''; position:absolute; inset:12px;
+  border:1.5px solid rgba(167,139,250,0.2);
+  border-radius:50%;
+}
+.template-1 .ring::after {
+  content:''; position:absolute; inset:24px;
+  border:1px solid rgba(167,139,250,0.15);
+  border-radius:50%;
+}
+@keyframes ringRotate {
+  from { transform:rotate(0deg); }
+  to { transform:rotate(360deg); }
+}
+.template-1 .score-big {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.template-1 .score-num {
+  font-size:56px; font-weight:700;
+  background:linear-gradient(180deg, #fff 0%, #a78bfa 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  line-height:1;
+}
+.template-1 .score-label {
+  font-size:12px; color:rgba(255,255,255,0.5);
+  margin-top:4px;
+}
+.template-1 .scores-row {
+  display:flex; gap:8px; margin-top:16px;
+}
+.template-1 .score-item {
+  width:56px; padding:10px 0;
+  background:rgba(167,139,250,0.1);
+  border:1px solid rgba(167,139,250,0.2);
+  border-radius:12px;
+  text-align:center;
+}
+.template-1 .score-item .emoji {
+  font-size:16px; margin-bottom:4px;
+}
+.template-1 .score-item .val {
+  font-size:14px; font-weight:600; color:#fff;
+}
+.template-1 .score-item .name {
+  font-size:9px; color:rgba(255,255,255,0.4);
+  margin-top:2px;
+}
+.template-1 .slogan {
+  margin-top:auto;
+  text-align:center;
+  font-size:13px; color:rgba(255,255,255,0.7);
+  line-height:1.6;
+}
+.template-1 .slogan strong {
+  color:#a78bfa; font-weight:600;
+}
+
+/* ── 模板2：爱情塔罗（三张牌阵） ── */
+.template-2 .card-content {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center;
+  padding:28px 20px;
+}
+.template-2 .tag {
+  font-size:11px; color:#ff6b9d;
+  letter-spacing:2px; margin-bottom:16px;
+}
+.template-2 .cards-row {
+  display:flex; align-items:flex-end; gap:12px;
+  margin-bottom:16px;
+}
+.template-2 .t-card {
+  width:70px; height:110px; border-radius:12px;
+  background:linear-gradient(160deg, rgba(255,107,157,0.25) 0%, rgba(180,60,120,0.15) 100%);
+  border:1.5px solid rgba(255,107,157,0.4);
+  backdrop-filter:blur(6px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative;
+}
+.template-2 .t-card::before {
+  content:'✦'; font-size:24px; color:rgba(255,107,157,0.6);
+}
+.template-2 .t-card .pos {
+  position:absolute; bottom:8px;
+  font-size:9px; color:rgba(255,255,255,0.5);
+}
+.template-2 .t-card.center {
+  height:130px; width:80px;
+  background:linear-gradient(160deg, rgba(255,107,157,0.4) 0%, rgba(180,60,120,0.25) 100%);
+  border-color:rgba(255,107,157,0.6);
+}
+.template-2 .t-card.center::before {
+  font-size:32px; color:rgba(255,107,157,0.8);
+}
+.template-2 .love-quote {
+  text-align:center; font-size:14px; color:rgba(255,255,255,0.85);
+  line-height:1.7; max-width:280px;
+}
+.template-2 .love-quote .highlight {
+  color:#ff6b9d; font-weight:600;
+}
+.template-2 .slogan {
+  margin-top:auto;
+  text-align:center;
+  font-size:13px; color:rgba(255,255,255,0.6);
+}
+
+/* ── 模板3：学业事业（阶梯上升） ── */
+.template-3 .card-content {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center;
+  padding:28px 20px;
+}
+.template-3 .tag {
+  font-size:11px; color:#60a5fa;
+  letter-spacing:2px; margin-bottom:20px;
+}
+.template-3 .career-icon {
+  width:80px; height:80px; border-radius:50%;
+  background:linear-gradient(135deg, rgba(96,165,250,0.3) 0%, rgba(59,130,246,0.2) 100%);
+  border:2px solid rgba(96,165,250,0.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:36px; margin-bottom:16px;
+  box-shadow:0 0 40px rgba(96,165,250,0.3);
+}
+.template-3 .career-title {
+  font-size:18px; font-weight:600; color:#fff;
+  margin-bottom:4px;
+}
+.template-3 .career-sub {
+  font-size:12px; color:rgba(255,255,255,0.5);
+  margin-bottom:20px;
+}
+.template-3 .progress-list {
+  width:100%; max-width:280px;
+}
+.template-3 .progress-item {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:14px;
+}
+.template-3 .progress-item .label {
+  width:60px; font-size:12px; color:rgba(255,255,255,0.6);
+}
+.template-3 .progress-bar {
+  flex:1; height:8px; border-radius:4px;
+  background:rgba(255,255,255,0.1);
+  overflow:hidden;
+}
+.template-3 .progress-bar .fill {
+  height:100%; border-radius:4px;
+  background:linear-gradient(90deg, #60a5fa, #3b82f6);
+  box-shadow:0 0 10px rgba(96,165,250,0.5);
+}
+.template-3 .progress-item .score {
+  width:32px; font-size:14px; font-weight:600; color:#60a5fa;
+  text-align:right;
+}
+.template-3 .slogan {
+  margin-top:auto;
+  text-align:center;
+  font-size:13px; color:rgba(255,255,255,0.6);
+}
+
+/* ── 模板4：财富运势（金币瀑布） ── */
+.template-4 .card-content {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center;
+  padding:28px 20px;
+}
+.template-4 .tag {
+  font-size:11px; color:#fbbf24;
+  letter-spacing:2px; margin-bottom:16px;
+}
+.template-4 .wealth-ring {
+  width:140px; height:140px; border-radius:50%;
+  background:linear-gradient(135deg, rgba(251,191,36,0.2) 0%, rgba(245,158,11,0.1) 100%);
+  border:2px solid rgba(251,191,36,0.4);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  margin-bottom:16px;
+  box-shadow:0 0 40px rgba(251,191,36,0.2);
+}
+.template-4 .wealth-ring .emoji {
+  font-size:48px; margin-bottom:4px;
+}
+.template-4 .wealth-ring .label {
+  font-size:11px; color:rgba(251,191,36,0.8);
+}
+.template-4 .wealth-score {
+  font-size:42px; font-weight:700;
+  background:linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom:4px;
+}
+.template-4 .wealth-rank {
+  font-size:12px; color:rgba(255,255,255,0.5);
+  margin-bottom:20px;
+}
+.template-4 .wealth-tags {
+  display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+  max-width:280px;
+}
+.template-4 .wealth-tag {
+  padding:6px 12px; border-radius:16px;
+  background:rgba(251,191,36,0.1);
+  border:1px solid rgba(251,191,36,0.3);
+  font-size:12px; color:#fbbf24;
+}
+.template-4 .slogan {
+  margin-top:auto;
+  text-align:center;
+  font-size:13px; color:rgba(255,255,255,0.6);
+}
+
+/* ── 未体验邀请卡 ── */
+.invite-card {
+  width:100%; aspect-ratio:390/680;
+  border-radius:20px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  margin-bottom:16px;
+}
+.invite-card .card-bg {
+  position:absolute; inset:0;
+}
+.invite-card .invite-content {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 30px;
+}
+.invite-card .invite-icon {
+  width:120px; height:120px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:20px;
+  position:relative;
+}
+.invite-card .invite-icon::before {
+  content:''; position:absolute; inset:-12px;
+  border-radius:50%;
+  animation:inviteGlow 2s ease-in-out infinite alternate;
+}
+@keyframes inviteGlow {
+  0% { box-shadow:0 0 20px var(--glow,rgba(167,139,250,0.3)); }
+  100% { box-shadow:0 0 40px var(--glow,rgba(167,139,250,0.5)); }
+}
+.invite-card .invite-icon .emoji {
+  font-size:52px;
+}
+.invite-card .invite-title {
+  font-size:20px; font-weight:600; color:#fff;
+  margin-bottom:8px;
+  text-align:center;
+}
+.invite-card .invite-desc {
+  font-size:14px; color:rgba(255,255,255,0.6);
+  text-align:center; line-height:1.6;
+  margin-bottom:24px;
+}
+.invite-card .invite-cta {
+  padding:14px 40px; border-radius:30px;
+  font-size:16px; font-weight:600; color:#fff;
+  cursor:pointer; border:none;
+  position:relative; overflow:hidden;
+}
+.invite-card .invite-cta::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+}
+
+/* 爱情邀请 */
+.invite-love .invite-icon {
+  background:linear-gradient(135deg, rgba(255,107,157,0.2) 0%, rgba(255,80,130,0.15) 100%);
+  border:2px solid rgba(255,107,157,0.4);
+  --glow:rgba(255,107,157,0.4);
+}
+.invite-love .invite-cta {
+  background:linear-gradient(135deg, #ff6b9d, #ff3d7f);
+  box-shadow:0 4px 20px rgba(255,107,157,0.4);
+}
+
+/* 事业邀请 */
+.invite-career .invite-icon {
+  background:linear-gradient(135deg, rgba(96,165,250,0.2) 0%, rgba(59,130,246,0.15) 100%);
+  border:2px solid rgba(96,165,250,0.4);
+  --glow:rgba(96,165,250,0.4);
+}
+.invite-career .invite-cta {
+  background:linear-gradient(135deg, #60a5fa, #3b82f6);
+  box-shadow:0 4px 20px rgba(96,165,250,0.4);
+}
+
+/* 财富邀请 */
+.invite-wealth .invite-icon {
+  background:linear-gradient(135deg, rgba(251,191,36,0.2) 0%, rgba(245,158,11,0.15) 100%);
+  border:2px solid rgba(251,191,36,0.4);
+  --glow:rgba(251,191,36,0.4);
+}
+.invite-wealth .invite-cta {
+  background:linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow:0 4px 20px rgba(251,191,36,0.4);
+}
+
+/* ── 模板切换标签 ── */
+.template-tabs {
+  display:flex; gap:8px; margin-bottom:16px;
+  overflow-x:auto; padding-bottom:4px;
+}
+.template-tab {
+  padding:8px 16px; border-radius:20px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  font-size:13px; color:rgba(255,255,255,0.6);
+  white-space:nowrap; cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+}
+.template-tab.active {
+  background:linear-gradient(135deg, rgba(167,139,250,0.3) 0%, rgba(124,58,237,0.2) 100%);
+  border-color:rgba(167,139,250,0.5);
+  color:#fff;
+}
+.template-tab .lock-icon {
+  font-size:10px; position:relative; top:-1px; margin-left:3px;
+  opacity:0.5;
+}
+.template-tab.unlocked .lock-icon {
+  display:none;
+}
+
+/* ── 分享面板 ── */
+.share-panel {
+  position:absolute; bottom:0; left:0; right:0; z-index:30;
+  background:linear-gradient(180deg, rgba(20,12,40,0.98) 0%, rgba(10,6,20,0.99) 100%);
+  border-radius:24px 24px 0 0;
+  padding:20px 0 30px;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.5);
+}
+.share-panel-header {
+  display:flex; align-items:center; justify-content:center;
+  position:relative; margin-bottom:20px;
+  padding:0 20px;
+}
+.share-panel-title {
+  font-size:16px; font-weight:600; color:#fff;
+}
+.share-panel-close {
+  position:absolute; right:20px; top:50%; transform:translateY(-50%);
+  width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.5);
+  cursor:pointer; font-size:18px;
+}
+
+/* 好友推荐 */
+.friends-row {
+  display:flex; gap:16px; padding:0 20px 16px;
+  overflow-x:auto;
+}
+.friend-item {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  min-width:56px; cursor:pointer;
+}
+.friend-avatar {
+  width:48px; height:48px; border-radius:50%;
+  background:linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+  border:2px solid rgba(167,139,250,0.3);
+}
+.friend-name {
+  font-size:11px; color:rgba(255,255,255,0.7);
+  max-width:56px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.friend-follow {
+  font-size:10px; color:#ff4d8d;
+  display:flex; align-items:center; gap:2px;
+}
+
+/* 分享渠道 */
+.share-channels {
+  display:flex; justify-content:space-around;
+  padding:16px 20px 0;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.channel-item {
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  cursor:pointer;
+}
+.channel-icon {
+  width:52px; height:52px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px;
+}
+.channel-icon.wechat { background:#07c160; }
+.channel-icon.moments { background:#07c160; }
+.channel-icon.qq { background:#12b7f5; }
+.channel-icon.link { background:rgba(255,255,255,0.1); }
+.channel-name {
+  font-size:12px; color:rgba(255,255,255,0.7);
+}
+
+/* ── 状态提示 toast ── */
+.toast {
+  position:absolute; top:110px; left:50%; transform:translateX(-50%);
+  padding:12px 24px; border-radius:12px;
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  font-size:14px; color:#fff;
+  z-index:50;
+  opacity:0; transition:opacity 0.3s;
+  pointer-events:none;
+}
+.toast.show { opacity:1; }
+
+/* ── 隐藏类 ── */
+.hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="page-bg"></div>
+
+  <!-- 顶部标题栏 -->
+  <div class="header">
+    <div class="header-title">分享运势</div>
+    <div class="close-btn" onclick="history.back()">✕</div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="content">
+    <!-- 用户信息 -->
+    <div class="user-info">
+      <div class="user-avatar">🐱</div>
+      <div class="user-name">小猫咪 <span>的运势分享</span></div>
+    </div>
+
+    <!-- 模板切换标签 -->
+    <div class="template-tabs" id="templateTabs">
+      <div class="template-tab active unlocked" onclick="switchTemplate(1)">今日运势</div>
+      <div class="template-tab unlocked" onclick="switchTemplate(2)">爱情塔罗</div>
+      <div class="template-tab" onclick="switchTemplate(3)">学业事业<span class="lock-icon">🔒</span></div>
+      <div class="template-tab" onclick="switchTemplate(4)">财富运势<span class="lock-icon">🔒</span></div>
+    </div>
+
+    <!-- ═══ 模板1：今日运势（始终可用） ═══ -->
+    <div class="share-card template-1" id="template1">
+      <div class="card-bg">
+        <div class="stars" id="stars1"></div>
+      </div>
+      <div class="card-content">
+        <div class="tag">TODAY'S FORTUNE</div>
+        <div class="ring-wrap">
+          <div class="ring"></div>
+          <div class="score-big">
+            <div class="score-num">88</div>
+            <div class="score-label">综合运势</div>
+          </div>
+        </div>
+        <div class="scores-row">
+          <div class="score-item">
+            <div class="emoji">💕</div>
+            <div class="val">100</div>
+            <div class="name">恋爱运</div>
+          </div>
+          <div class="score-item">
+            <div class="emoji">💼</div>
+            <div class="val">78</div>
+            <div class="name">事业运</div>
+          </div>
+          <div class="score-item">
+            <div class="emoji">💰</div>
+            <div class="val">85</div>
+            <div class="name">金钱运</div>
+          </div>
+          <div class="score-item">
+            <div class="emoji">💪</div>
+            <div class="val">92</div>
+            <div class="name">健康运</div>
+          </div>
+        </div>
+        <div class="slogan">
+          今天<strong>好运爆棚</strong> ✦<br>
+          你也快来看看今日运势吧！
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 模板2：爱情塔罗（已体验 → 结果卡） ═══ -->
+    <div class="share-card template-2 hidden" id="template2Result">
+      <div class="card-bg">
+        <div class="stars" id="stars2"></div>
+      </div>
+      <div class="card-content">
+        <div class="tag">LOVE TAROT</div>
+        <div class="cards-row">
+          <div class="t-card"><span class="pos">过去</span></div>
+          <div class="t-card center"><span class="pos">现在</span></div>
+          <div class="t-card"><span class="pos">未来</span></div>
+        </div>
+        <div class="love-quote">
+          你的<span class="highlight">正缘</span>正在靠近<br>
+          保持开放的心，<span class="highlight">真爱</span>即将降临
+        </div>
+        <div class="slogan">
+          ✦ 抽张塔罗牌，看看你的爱情运势
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 模板2：爱情塔罗（未体验 → 邀请卡） ═══ -->
+    <div class="invite-card invite-love hidden" id="template2Invite">
+      <div class="card-bg">
+        <div class="stars" id="stars2i"></div>
+      </div>
+      <div class="invite-content">
+        <div class="invite-icon">
+          <div class="emoji">💕</div>
+        </div>
+        <div class="invite-title">你的爱情运势如何？</div>
+        <div class="invite-desc">
+          抽三张塔罗牌<br>解读你的过去、现在与未来
+        </div>
+        <button class="invite-cta" onclick="location.href='1塔罗抽卡玩法.html'">✦ 去抽爱情塔罗</button>
+      </div>
+    </div>
+
+    <!-- ═══ 模板3：学业事业（已体验 → 结果卡） ═══ -->
+    <div class="share-card template-3 hidden" id="template3Result">
+      <div class="card-bg">
+        <div class="stars" id="stars3"></div>
+      </div>
+      <div class="card-content">
+        <div class="tag">CAREER & STUDY</div>
+        <div class="career-icon">🚀</div>
+        <div class="career-title">事业上升期</div>
+        <div class="career-sub">把握机会，突破自我</div>
+        <div class="progress-list">
+          <div class="progress-item">
+            <span class="label">事业运</span>
+            <div class="progress-bar"><div class="fill" style="width:85%"></div></div>
+            <span class="score">85</span>
+          </div>
+          <div class="progress-item">
+            <span class="label">学业运</span>
+            <div class="progress-bar"><div class="fill" style="width:92%"></div></div>
+            <span class="score">92</span>
+          </div>
+          <div class="progress-item">
+            <span class="label">贵人运</span>
+            <div class="progress-bar"><div class="fill" style="width:78%"></div></div>
+            <span class="score">78</span>
+          </div>
+        </div>
+        <div class="slogan">
+          ✦ 努力终有回报，未来可期
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 模板3：学业事业（未体验 → 邀请卡） ═══ -->
+    <div class="invite-card invite-career hidden" id="template3Invite">
+      <div class="card-bg">
+        <div class="stars" id="stars3i"></div>
+      </div>
+      <div class="invite-content">
+        <div class="invite-icon">
+          <div class="emoji">🚀</div>
+        </div>
+        <div class="invite-title">你的事业学业运势？</div>
+        <div class="invite-desc">
+          摇一摇手机<br>看看今天事业学业运势如何
+        </div>
+        <button class="invite-cta" onclick="location.href='2摇一摇玩法.html'">✦ 去摇事业运势</button>
+      </div>
+    </div>
+
+    <!-- ═══ 模板4：财富运势（已体验 → 结果卡） ═══ -->
+    <div class="share-card template-4 hidden" id="template4Result">
+      <div class="card-bg">
+        <div class="stars" id="stars4"></div>
+      </div>
+      <div class="card-content">
+        <div class="tag">WEALTH FORTUNE</div>
+        <div class="wealth-ring">
+          <div class="emoji">💎</div>
+          <div class="label">财运亨通</div>
+        </div>
+        <div class="wealth-score">¥ 8,888</div>
+        <div class="wealth-rank">今日财运指数 · 超越 88% 用户</div>
+        <div class="wealth-tags">
+          <span class="wealth-tag">正财旺盛</span>
+          <span class="wealth-tag">偏财可期</span>
+          <span class="wealth-tag">投资顺利</span>
+        </div>
+        <div class="slogan">
+          ✦ 财源滚滚来，好运挡不住
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 模板4：财富运势（未体验 → 邀请卡） ═══ -->
+    <div class="invite-card invite-wealth hidden" id="template4Invite">
+      <div class="card-bg">
+        <div class="stars" id="stars4i"></div>
+      </div>
+      <div class="invite-content">
+        <div class="invite-icon">
+          <div class="emoji">💎</div>
+        </div>
+        <div class="invite-title">你今天的财运好吗？</div>
+        <div class="invite-desc">
+          翻开财运塔罗牌<br>看看金钱运势走向
+        </div>
+        <button class="invite-cta" onclick="location.href='3抽卡玩法.html'">✦ 去看财运</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- toast 提示 -->
+  <div class="toast" id="toast"></div>
+
+  <!-- 分享面板 -->
+  <div class="share-panel">
+    <div class="share-panel-header">
+      <div class="share-panel-title">一键分享至</div>
+      <div class="share-panel-close" onclick="history.back()">✕</div>
+    </div>
+
+    <!-- 好友推荐 -->
+    <div class="friends-row">
+      <div class="friend-item">
+        <div class="friend-avatar">👧</div>
+        <div class="friend-name">排骨排骨君</div>
+        <div class="friend-follow">+ 关注</div>
+      </div>
+      <div class="friend-item">
+        <div class="friend-avatar">🐱</div>
+        <div class="friend-name">BuGXAA</div>
+        <div class="friend-follow">+ 关注</div>
+      </div>
+      <div class="friend-item">
+        <div class="friend-avatar">🐟</div>
+        <div class="friend-name">小张</div>
+        <div class="friend-follow">+ 关注</div>
+      </div>
+      <div class="friend-item">
+        <div class="friend-avatar">✨</div>
+        <div class="friend-name">EKIN-飞</div>
+        <div class="friend-follow">+ 关注</div>
+      </div>
+      <div class="friend-item">
+        <div class="friend-avatar">🎨</div>
+        <div class="friend-name">User_160</div>
+        <div class="friend-follow">+ 关注</div>
+      </div>
+    </div>
+
+    <!-- 分享渠道 -->
+    <div class="share-channels">
+      <div class="channel-item">
+        <div class="channel-icon wechat">💬</div>
+        <div class="channel-name">微信朋友</div>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon moments">📷</div>
+        <div class="channel-name">朋友圈</div>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon qq">🐧</div>
+        <div class="channel-name">QQ朋友</div>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon link">🔗</div>
+        <div class="channel-name">复制链接</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── 玩法完成状态 ──
+// true = 已体验过，可分享结果卡；false = 未体验，显示邀请卡
+const gameCompleted = {
+  1: true,  // 今日运势：始终可用（填生日就有）
+  2: true,  // 爱情塔罗：已体验（从03b结算页跳来的）
+  3: false, // 学业事业：未体验
+  4: false  // 财富运势：未体验
+};
+
+// 生成星点
+function createStars(containerId, count) {
+  const container = document.getElementById(containerId);
+  if (!container || container.childNodes.length > 0) return;
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.8;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      --d:${(Math.random()*2+1.5).toFixed(1)}s;
+      --dl:${(Math.random()*2).toFixed(1)}s;
+      --o1:${(Math.random()*0.2+0.05).toFixed(2)};
+      --o2:${(Math.random()*0.6+0.4).toFixed(2)};
+    `;
+    container.appendChild(s);
+  }
+}
+
+// 初始化所有星点
+['stars1','stars2','stars2i','stars3','stars3i','stars4','stars4i'].forEach(id => createStars(id, 50));
+
+// 切换模板
+function switchTemplate(n) {
+  // 更新标签高亮
+  const tabs = document.querySelectorAll('.template-tab');
+  tabs.forEach((tab, i) => {
+    tab.classList.toggle('active', i === n - 1);
+  });
+
+  // 隐藏所有模板卡片
+  const allCards = [
+    'template1',
+    'template2Result', 'template2Invite',
+    'template3Result', 'template3Invite',
+    'template4Result', 'template4Invite'
+  ];
+  allCards.forEach(id => document.getElementById(id).classList.add('hidden'));
+
+  // 显示当前模板
+  if (n === 1) {
+    document.getElementById('template1').classList.remove('hidden');
+  } else {
+    if (gameCompleted[n]) {
+      document.getElementById('template' + n + 'Result').classList.remove('hidden');
+    } else {
+      document.getElementById('template' + n + 'Invite').classList.remove('hidden');
+      // 未体验时提示
+      showToast('你还没体验过这个玩法，先去玩再分享吧！');
+    }
+  }
+
+  // 更新标签锁图标
+  tabs.forEach((tab, i) => {
+    const idx = i + 1;
+    tab.classList.toggle('unlocked', gameCompleted[idx]);
+    // 更新锁icon显示
+    const lockEl = tab.querySelector('.lock-icon');
+    if (lockEl) lockEl.style.display = gameCompleted[idx] ? 'none' : 'inline';
+  });
+}
+
+// toast 提示
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// 初始化标签状态
+switchTemplate(1);
+</script>
+
+</body>
+</html>

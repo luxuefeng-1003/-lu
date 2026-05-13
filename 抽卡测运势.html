@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>抽卡测运势</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#000;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+  overflow:hidden;
+}
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+  background:#050210;
+}
+.bg-sky {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 300% 80% at 50% -10%, #2a0f6e 0%, #1a0a40 35%, transparent 65%),
+    radial-gradient(ellipse 150% 60% at 20% 60%, #1e0d50 0%, transparent 50%),
+    radial-gradient(ellipse 150% 60% at 80% 40%, #200a4a 0%, transparent 50%),
+    linear-gradient(180deg, #070318 0%, #0a0420 40%, #060215 100%);
+}
+.bg-nebula {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 220px 180px at 50% 28%, rgba(100,40,200,0.45) 0%, rgba(60,20,140,0.2) 40%, transparent 70%),
+    radial-gradient(ellipse 140px 100px at 20% 45%, rgba(80,30,180,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 100px 80px at 80% 35%, rgba(120,50,200,0.25) 0%, transparent 60%);
+}
+.bg-clouds {
+  position:absolute; bottom:0; left:0; right:0; height:300px; z-index:2; pointer-events:none;
+  background:
+    radial-gradient(ellipse 200px 80px at 10% 100%, rgba(60,30,120,0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 180px 60px at 85% 100%, rgba(60,30,120,0.4) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 100px at 50% 110%, rgba(40,20,100,0.6) 0%, transparent 60%);
+}
+.stars { position:absolute; inset:0; z-index:3; pointer-events:none; }
+.star {
+  position:absolute; border-radius:50%;
+  animation: twinkle var(--dur,2s) ease-in-out infinite var(--delay,0s);
+}
+@keyframes twinkle {
+  0%,100%{ opacity:var(--min-op,0.3); transform:scale(1); }
+  50%{ opacity:1; transform:scale(1.4); }
+}
+.meteor {
+  position:absolute; z-index:4; pointer-events:none;
+  width:60px; height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0.8),transparent);
+  animation:meteorFly 3s ease-in infinite; border-radius:2px;
+}
+@keyframes meteorFly {
+  0%{ opacity:0; transform:translate(0,0) rotate(-30deg); }
+  10%{ opacity:1; }
+  80%{ opacity:0.5; }
+  100%{ opacity:0; transform:translate(-120px,80px) rotate(-30deg); }
+}
+.status-bar {
+  position:absolute; top:0; left:0; right:0; height:50px; z-index:60;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 26px 0;
+  background:transparent;
+}
+.s-time { font-size:15px; font-weight:600; color:rgba(255,255,255,0.85); }
+.s-icons { display:flex; align-items:center; gap:5px; }
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:rgba(255,255,255,0.8); border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;}
+.sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:rgba(255,255,255,0.8); border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid rgba(255,255,255,0.8); border-bottom:none; border-radius:8px 8px 0 0; }
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.65); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.55); border-radius:0 1px 1px 0; }
+.bat-fill { background:rgba(255,255,255,0.8); border-radius:1px; height:100%; width:82%; }
+
+.page-title-wrap {
+  position:absolute; top:54px; left:0; right:0; z-index:20;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+.back-btn {
+  position:absolute; left:16px; top:0; width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.6); cursor:pointer;
+}
+.title-deco { display:flex; align-items:center; gap:8px; }
+.title-star { font-size:14px; color:#fde68a; opacity:0.8; }
+.title-main {
+  font-size:17px; font-weight:700;
+  background:linear-gradient(90deg,#fde68a,#f9a8d4,#c084fc);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:2px;
+}
+.title-sub { font-size:12px; color:rgba(167,139,250,0.7); letter-spacing:1px; }
+
+/* ── 抽卡阶段：槽位区（绝对定位） ── */
+.slots-area {
+  position:absolute; top:160px; left:0; right:0; z-index:20;
+  display:flex; justify-content:center; align-items:flex-end; gap:16px;
+}
+.slot { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.slot-label { font-size:10px; color:rgba(255,215,100,0.7); letter-spacing:1px; }
+.slot-card {
+  width:90px; height:135px; border-radius:10px;
+  border:1.5px solid rgba(167,139,250,0.3);
+  background:rgba(255,255,255,0.03);
+  position:relative; overflow:hidden;
+  box-shadow:0 0 16px rgba(100,40,200,0.2), inset 0 0 20px rgba(80,20,160,0.1);
+}
+.slot-card::before {
+  content:''; position:absolute; inset:5px;
+  border:1px dashed rgba(167,139,250,0.2); border-radius:4px;
+}
+.slot-card::after {
+  content:'+'; position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; color:rgba(167,139,250,0.2);
+}
+.slot-card.filled::before, .slot-card.filled::after { display:none; }
+
+/* 魔法阵 */
+.magic-circle {
+  position:absolute; z-index:5; left:50%; bottom:260px;
+  transform:translateX(-50%); width:260px; height:260px; pointer-events:none;
+}
+.mc-ring { position:absolute; inset:0; border-radius:50%; border:1px solid rgba(167,139,250,0.25); animation:mcRotate 12s linear infinite; }
+.mc-ring-2 { inset:20px; border-color:rgba(232,121,249,0.2); animation:mcRotate 8s linear infinite reverse; }
+.mc-ring-3 { inset:40px; border-color:rgba(167,139,250,0.15); border-style:dashed; animation:mcRotate 20s linear infinite; }
+.mc-center-glow { position:absolute; inset:0; background:radial-gradient(ellipse 60px 40px at 50% 90%, rgba(167,139,250,0.35) 0%, transparent 70%); }
+@keyframes mcRotate { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.mc-dot { position:absolute; border-radius:50%; background:#fde68a; width:4px; height:4px; box-shadow:0 0 6px #fde68a; animation:mcDotPulse 2s ease-in-out infinite; }
+@keyframes mcDotPulse { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+
+/* 底部牌组 */
+.cards-row { position:absolute; z-index:15; left:50%; bottom:260px; transform:translateX(-50%); width:340px; height:130px; }
+.deck-card {
+  position:absolute; width:48px; height:76px; border-radius:7px; cursor:pointer;
+  transform-origin:center bottom; transition:transform 0.25s ease, box-shadow 0.25s ease;
+  background:linear-gradient(145deg,#1e0858 0%,#2d1080 40%,#190840 100%);
+  border:1px solid rgba(167,139,250,0.5);
+  box-shadow:0 4px 20px rgba(80,20,180,0.4), 0 0 0 0.5px rgba(200,160,255,0.2);
+  overflow:hidden; will-change:transform;
+}
+.deck-card::before { content:''; position:absolute; inset:4px; border:1px solid rgba(167,139,250,0.25); border-radius:4px; }
+.deck-card::after {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 30px 50px at 50% 40%, rgba(167,139,250,0.18) 0%,transparent 70%),
+    repeating-linear-gradient(45deg, rgba(167,139,250,0.04) 0px, rgba(167,139,250,0.04) 1px, transparent 1px, transparent 7px);
+}
+.deck-card.hover-lift { box-shadow:0 8px 32px rgba(167,139,250,0.6), 0 0 20px rgba(232,121,249,0.3); z-index:99 !important; }
+.deck-card.picked { pointer-events:none; opacity:0; }
+.card-emblem { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:1; }
+
+/* 飞行牌 */
+.flying-card {
+  position:absolute; z-index:100; width:72px; height:110px; border-radius:8px;
+  background:linear-gradient(145deg,#1e0858 0%,#2d1080 40%,#190840 100%);
+  border:1.5px solid rgba(232,121,249,0.7);
+  box-shadow:0 0 30px rgba(232,121,249,0.6), 0 0 60px rgba(167,139,250,0.4);
+  pointer-events:none; overflow:hidden; will-change:transform;
+}
+.flying-card::before { content:''; position:absolute; inset:4px; border:1px solid rgba(232,121,249,0.3); border-radius:4px; }
+.flying-card::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 30px 50px at 50% 40%, rgba(232,121,249,0.25) 0%,transparent 70%); }
+
+/* 提示文字 */
+.hint-text {
+  position:absolute; z-index:25; left:0; right:0; bottom:260px;
+  text-align:center; font-size:14px; font-weight:500; color:rgba(255,255,255,0.85);
+  letter-spacing:2px; text-shadow:0 0 16px rgba(167,139,250,0.9), 0 0 32px rgba(232,121,249,0.5);
+  opacity:0; transition:opacity 0.6s ease; pointer-events:none;
+}
+.hint-text.show { opacity:1; }
+
+/* 底部按钮 */
+.bottom-area {
+  position:absolute; bottom:100px; left:0; right:0; z-index:35;
+  padding:10px 16px 0;
+  background:linear-gradient(0deg, rgba(5,2,16,0.96) 55%, transparent 100%);
+}
+.btn-draw {
+  width:100%; height:52px; border:none; border-radius:14px; cursor:pointer;
+  font-size:16px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#7c3aed,#a855f7,#c026d3);
+  box-shadow:0 4px 28px rgba(124,58,237,0.5);
+  letter-spacing:0.5px; position:relative; overflow:hidden;
+  transition:opacity 0.3s, transform 0.15s;
+}
+.btn-draw:active { transform:scale(0.98); }
+.btn-draw::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 100%); }
+.btn-draw:disabled { opacity:0.4; cursor:not-allowed; }
+.btn-txt { position:relative; z-index:1; }
+
+/* slot 内正面卡 */
+.slot-filled-card {
+  width:100%; height:100%; border-radius:9px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; padding:8px 6px;
+  background:linear-gradient(160deg,rgba(120,60,200,0.25) 0%,rgba(60,20,120,0.2) 100%);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(232,121,249,0.3);
+}
+.sfc-name { font-size:10px; color:#fff; font-weight:700; text-align:center; line-height:1.3; }
+.sfc-num  { font-size:9px; color:rgba(232,121,249,0.7); }
+
+/* home bar */
+.home-bar {
+  position:absolute; bottom:7px; left:50%; transform:translateX(-50%);
+  width:130px; height:4px; background:rgba(255,255,255,0.2); border-radius:2px; z-index:40;
+}
+
+/* 揭示动画遮罩 */
+.reveal-overlay {
+  position:absolute; inset:0; z-index:80;
+  background:rgba(5,2,16,0.92);
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 0.4s ease;
+}
+.reveal-overlay.show { display:flex; opacity:1; }
+
+.reveal-card {
+  width:120px; height:180px; border-radius:12px;
+  background:linear-gradient(160deg,rgba(120,60,200,0.35) 0%,rgba(60,20,120,0.25) 100%);
+  border:2px solid rgba(232,121,249,0.6);
+  box-shadow:0 0 40px rgba(232,121,249,0.5), 0 0 80px rgba(167,139,250,0.3);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; padding:12px 8px;
+  transform:scale(0.8); opacity:0;
+  transition:transform 0.5s cubic-bezier(0.34,1.4,0.64,1), opacity 0.4s ease;
+}
+.reveal-overlay.show .reveal-card {
+  transform:scale(1); opacity:1;
+  transition-delay:0.2s;
+}
+.reveal-icon { font-size:36px; margin-bottom:4px; }
+.reveal-name { font-size:14px; font-weight:700; color:#fff; text-align:center; }
+.reveal-num { font-size:11px; color:rgba(232,121,249,0.8); }
+.reveal-text {
+  color:rgba(255,255,255,0.7); font-size:14px; margin-top:24px;
+  opacity:0; transform:translateY(10px);
+  transition:opacity 0.4s ease 0.6s, transform 0.4s ease 0.6s;
+}
+.reveal-overlay.show .reveal-text { opacity:1; transform:translateY(0); }
+.reveal-btn {
+  margin-top:20px;
+  padding:12px 32px;
+  border:none; border-radius:12px;
+  background:linear-gradient(135deg,#7c3aed,#a855f7);
+  color:#fff; font-size:14px; font-weight:600;
+  cursor:pointer; opacity:0; transform:translateY(10px);
+  transition:opacity 0.4s ease 0.9s, transform 0.4s ease 0.9s;
+}
+.reveal-overlay.show .reveal-btn { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <div class="bg-sky"></div>
+  <div class="bg-nebula"></div>
+  <div class="bg-clouds"></div>
+  <div class="stars" id="stars"></div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="s-time">09:41</span>
+    <div class="s-icons">
+      <div class="sig"><b></b><b></b><b></b><b></b></div>
+      <div class="wifi"></div>
+      <div class="bat"><div class="bat-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- 标题 -->
+  <div class="page-title-wrap" id="titleWrap">
+    <div class="back-btn" onclick="location.href='0测算方式选择页.html'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="title-deco">
+      <span class="title-star">✦</span>
+      <span class="title-main">今日运势抽卡</span>
+      <span class="title-star">✦</span>
+    </div>
+    <div class="title-sub">抽取属于你的今日运势卡</div>
+  </div>
+
+  <!-- 槽位区 -->
+  <div class="slots-area" id="slotsArea">
+    <div class="slot"><div class="slot-label">今日运势</div><div class="slot-card" id="slot0"></div></div>
+  </div>
+
+  <!-- 魔法阵 -->
+  <div class="magic-circle" id="magicCircle">
+    <div class="mc-ring"></div><div class="mc-ring mc-ring-2"></div><div class="mc-ring mc-ring-3"></div>
+    <div class="mc-center-glow"></div>
+    <div class="mc-dot" style="left:48%;top:2%;animation-delay:0s"></div>
+    <div class="mc-dot" style="left:80%;top:22%;animation-delay:0.4s"></div>
+    <div class="mc-dot" style="left:90%;top:55%;animation-delay:0.8s"></div>
+    <div class="mc-dot" style="left:70%;top:88%;animation-delay:1.2s"></div>
+    <div class="mc-dot" style="left:30%;top:88%;animation-delay:1.6s"></div>
+    <div class="mc-dot" style="left:10%;top:55%;animation-delay:2s"></div>
+    <div class="mc-dot" style="left:18%;top:22%;animation-delay:0.2s"></div>
+  </div>
+
+  <!-- 提示文字 -->
+  <div class="hint-text" id="hintText">心中默念你的问题</div>
+
+  <!-- 牌堆 -->
+  <div class="cards-row" id="cardsRow"></div>
+
+  <!-- 底部按钮 -->
+  <div class="bottom-area" id="bottomArea">
+    <button class="btn-draw" id="drawBtn">
+      <span class="btn-txt" id="btnTxt">✦ 点击抽取今日运势</span>
+    </button>
+  </div>
+
+  <div class="home-bar"></div>
+
+  <!-- 揭示遮罩 -->
+  <div class="reveal-overlay" id="revealOverlay">
+    <div class="reveal-card" id="revealCard">
+      <div class="reveal-icon" id="revealIcon">🌟</div>
+      <div class="reveal-name" id="revealName">命运之轮</div>
+      <div class="reveal-num" id="revealNum">X</div>
+    </div>
+    <div class="reveal-text" id="revealText">命运的齿轮已为你转动</div>
+    <button class="reveal-btn" onclick="goToFortune()">查看我的今日运势</button>
+  </div>
+
+</div>
+
+<script>
+const CARD_COUNT = 76;
+const CARD_DATA = [
+  { name:'命运之轮', num:'X', icon:'🎡', keyword:'转机', desc:'今天你将迎来意想不到的转机，保持开放的心态，好运正在路上。' },
+  { name:'星星', num:'XVII', icon:'⭐', keyword:'希望', desc:'希望之光将照亮你的前路，过去的阴霾正在散去。' },
+  { name:'太阳', num:'XIX', icon:'☀️', keyword:'活力', desc:'今天充满活力与正能量，适合开展新计划或与朋友相聚。' },
+  { name:'月亮', num:'XVIII', icon:'🌙', keyword:'直觉', desc:'跟随内心的直觉，它会引导你做出正确的选择。' },
+  { name:'魔术师', num:'I', icon:'🪄', keyword:'创造', desc:'今天你有强大的创造力，把握机会展现你的才华。' },
+  { name:'力量', num:'XI', icon:'🦁', keyword:'勇气', desc:'内心的勇气将帮助你克服今天的挑战，相信自己的力量。' },
+  { name:'恋人', num:'VI', icon:'💕', keyword:'连结', desc:'今天适合与重要的人加深联系，温暖的关系将带来好运。' },
+  { name:'隐士', num:'IX', icon:'🕯️', keyword:'内省', desc:'今天适合独处思考，给自己一些安静的时间来理清思路。' },
+];
+
+const phone = document.getElementById('phone');
+const cardsRow = document.getElementById('cardsRow');
+const drawBtn = document.getElementById('drawBtn');
+const btnTxt = document.getElementById('btnTxt');
+const hintText = document.getElementById('hintText');
+const slot = document.getElementById('slot0');
+
+let phase = 'idle';
+let cardEls = [];
+let pickedData = null;
+
+// 生成星星
+const starsEl = document.getElementById('stars');
+for(let i=0;i<80;i++){
+  const s=document.createElement('div'); s.className='star';
+  const sz=Math.random()*2.5+0.5;
+  const col=Math.random()<0.3?`rgba(255,220,150,${0.6+Math.random()*0.4})`:`rgba(255,255,255,${0.4+Math.random()*0.6})`;
+  s.style.cssText=`width:${sz}px;height:${sz}px;background:${col};left:${Math.random()*100}%;top:${Math.random()*60}%;--dur:${1.5+Math.random()*3}s;--delay:${Math.random()*4}s;--min-op:${0.2+Math.random()*0.3};`;
+  starsEl.appendChild(s);
+}
+for(let i=0;i<3;i++){
+  const m=document.createElement('div'); m.className='meteor';
+  m.style.cssText=`top:${8+i*8}%;left:${20+i*25}%;animation-delay:${i*2.5+1}s;`;
+  starsEl.appendChild(m);
+}
+
+function getCardTransform(idx, total) {
+  const span=90, angle=total>1?-span/2+idx*(span/(total-1)):0;
+  const centerX=340/2-48/2, spread=290;
+  const x=centerX-spread/2+idx*(spread/(Math.max(total-1,1)));
+  const normIdx=total>1?(idx/(total-1))*2-1:0;
+  const y=10+normIdx*normIdx*28;
+  return {x,y,angle};
+}
+
+function buildCards(){
+  cardsRow.innerHTML=''; cardEls=[];
+  for(let i=0;i<CARD_COUNT;i++){
+    const {x,y,angle}=getCardTransform(i,CARD_COUNT);
+    const card=document.createElement('div');
+    card.className='deck-card'; card.dataset.idx=i;
+    card.style.cssText=`left:${x}px;top:${y}px;transform:rotate(${angle}deg);z-index:${10+i};opacity:0;transition:transform 0.25s ease,box-shadow 0.25s ease,opacity 0.4s ease;`;
+    card.innerHTML=`<div class="card-emblem"><svg width="28" height="36" viewBox="0 0 40 52" fill="none">
+      <defs><linearGradient id="ce${i}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e879f9" stop-opacity="0.6"/><stop offset="100%" stop-color="#a78bfa" stop-opacity="0.4"/></linearGradient></defs>
+      <ellipse cx="20" cy="26" rx="14" ry="20" stroke="url(#ce${i})" stroke-width="1"/>
+      <line x1="20" y1="6" x2="20" y2="46" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/>
+      <line x1="6" y1="26" x2="34" y2="26" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/>
+      <circle cx="20" cy="26" r="3" fill="#a78bfa" opacity="0.7"/>
+    </svg></div>`;
+    card.addEventListener('mouseenter',()=>onCardHover(i));
+    card.addEventListener('mouseleave',()=>onCardLeave(i));
+    card.addEventListener('click',()=>onCardClick(i));
+    cardsRow.appendChild(card);
+    cardEls.push(card);
+  }
+}
+
+function dealCards(cb){
+  cardEls.forEach((c,i)=>{
+    const delay=Math.floor(i/5)*30+100;
+    c.style.transform=`rotate(${getCardTransform(i,CARD_COUNT).angle}deg) translateY(30px)`;
+    setTimeout(()=>{ c.style.opacity='1'; c.style.transform=`rotate(${getCardTransform(i,CARD_COUNT).angle}deg) translateY(0px)`; },delay);
+  });
+  setTimeout(cb, Math.floor(CARD_COUNT/5)*30+500);
+}
+
+function onCardHover(i){
+  if(phase!=='waiting'&&phase!=='picking') return;
+  if(cardEls[i].classList.contains('picked')) return;
+  const {angle}=getCardTransform(i,CARD_COUNT);
+  cardEls[i].style.transform=`rotate(${angle}deg) translateY(-16px) scale(1.08)`;
+  cardEls[i].classList.add('hover-lift');
+}
+function onCardLeave(i){
+  if(cardEls[i].classList.contains('picked')) return;
+  const {angle}=getCardTransform(i,CARD_COUNT);
+  cardEls[i].style.transform=`rotate(${angle}deg) translateY(0) scale(1)`;
+  cardEls[i].classList.remove('hover-lift');
+}
+
+function onCardClick(i){
+  if(phase!=='waiting'&&phase!=='picking') return;
+  if(cardEls[i].classList.contains('picked')) return;
+  phase='picking';
+  
+  // 随机选一张运势卡
+  const data=CARD_DATA[Math.floor(Math.random() * CARD_DATA.length)];
+  pickedData = data;
+
+  const phoneRect=phone.getBoundingClientRect();
+  const cardRect=cardEls[i].getBoundingClientRect();
+  const fromX=cardRect.left-phoneRect.left-(90-48)/2;
+  const fromY=cardRect.top-phoneRect.top-(135-76)/2;
+  const slotRect=slot.getBoundingClientRect();
+  const toX=slotRect.left-phoneRect.left;
+  const toY=slotRect.top-phoneRect.top;
+
+  const fly=document.createElement('div');
+  fly.className='flying-card';
+  fly.style.cssText=`left:${fromX}px;top:${fromY}px;transform:rotate(${getCardTransform(i,CARD_COUNT).angle}deg);`;
+  phone.appendChild(fly);
+  cardEls[i].classList.add('picked');
+  cardEls[i].style.opacity='0';
+
+  requestAnimationFrame(()=>{
+    fly.style.transition='all 0.55s cubic-bezier(0.34,1.1,0.64,1)';
+    fly.style.left=toX+'px'; fly.style.top=toY+'px';
+    fly.style.transform='rotate(0deg) scale(1)';
+    fly.style.width='90px'; fly.style.height='135px';
+  });
+
+  setTimeout(()=>{
+    fly.remove();
+    slot.classList.add('filled');
+    slot.innerHTML=`<div class="slot-filled-card">
+      <svg width="40" height="50" viewBox="0 0 40 52" fill="none">
+        <ellipse cx="20" cy="26" rx="13" ry="18" fill="rgba(232,121,249,0.1)" stroke="rgba(232,121,249,0.5)" stroke-width="1"/>
+        <circle cx="20" cy="26" r="4" fill="#e879f9" opacity="0.8"/>
+        <line x1="20" y1="8" x2="20" y2="44" stroke="rgba(232,121,249,0.3)" stroke-width="0.8"/>
+        <line x1="7" y1="26" x2="33" y2="26" stroke="rgba(232,121,249,0.3)" stroke-width="0.8"/>
+      </svg>
+      <div class="sfc-name">${data.name}</div>
+      <div class="sfc-num">${data.num}</div>
+    </div>`;
+    
+    // 显示揭示动画
+    showReveal(data);
+  },580);
+}
+
+function showReveal(data){
+  document.getElementById('revealIcon').textContent = data.icon;
+  document.getElementById('revealName').textContent = data.name;
+  document.getElementById('revealNum').textContent = data.num;
+  document.getElementById('revealText').textContent = data.desc;
+  
+  const overlay = document.getElementById('revealOverlay');
+  overlay.classList.add('show');
+}
+
+function goToFortune(){
+  location.href = '抽卡运势主页.html';
+}
+
+// 点击按钮开始抽卡
+drawBtn.addEventListener('click',()=>{
+  if(phase!=='idle') return;
+  phase='spreading';
+  drawBtn.disabled=true;
+  btnTxt.textContent='心中默念你的问题…';
+  hintText.classList.add('show');
+  buildCards();
+  setTimeout(()=>{
+    dealCards(()=>{
+      phase='waiting';
+      hintText.classList.remove('show');
+      setTimeout(()=>{ hintText.textContent='选择 1 张运势卡'; hintText.classList.add('show'); },300);
+      btnTxt.textContent='✦ 点击抽取';
+      drawBtn.disabled=false;
+    });
+  },600);
+});
+</script>
+
+</body>
+</html>

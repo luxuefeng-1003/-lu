@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>今日运势 - 空态</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#0a0a14;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+}
+
+.page-bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 200% 60% at 50% 0%, #2a0f5e 0%, transparent 60%),
+    radial-gradient(ellipse 100% 40% at 80% 30%, #1a0a40 0%, transparent 50%),
+    linear-gradient(180deg, #0d0620 0%, #10082a 30%, #0a0618 60%, #060412 100%);
+}
+
+.nebula {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 180px 100px at 30% 18%, rgba(120,60,220,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 120px 80px at 75% 12%, rgba(180,100,255,0.12) 0%, transparent 70%);
+}
+
+.stars-layer {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 6%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 22% 4%, rgba(255,230,150,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 9%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 5%, rgba(200,180,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 7%, rgba(255,230,150,0.6) 0%, transparent 100%);
+}
+
+.scroll-content {
+  position:absolute; inset:0; z-index:10;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 24px;
+}
+.scroll-content::-webkit-scrollbar { display:none; }
+
+/* 返回按钮 */
+.back-btn {
+  position:absolute; top:50px; left:16px;
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  z-index:20;
+}
+
+/* 用户信息行 */
+.user-info-row {
+  display:flex; align-items:center; gap:12px;
+  padding:16px;
+  width:100%;
+  justify-content:center;
+}
+.user-avatar {
+  width:40px; height:40px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  border:1.5px solid rgba(167,139,250,0.3);
+  display:flex; align-items:center; justify-content:center;
+}
+.user-name {
+  font-size:16px; font-weight:600; color:#fff;
+}
+
+/* 运势标语 */
+.fortune-slogan {
+  font-size:20px; font-weight:700;
+  color:#fff;
+  text-align:center;
+  margin-bottom:24px;
+  text-shadow:0 0 20px rgba(167,139,250,0.5);
+}
+
+/* 运势徽章区域 */
+.fortune-badge {
+  position:relative;
+  width:200px; height:200px;
+  margin-bottom:32px;
+}
+
+/* 外圈光环 */
+.badge-glow {
+  position:absolute; inset:-20px;
+  background:radial-gradient(circle, rgba(167,139,250,0.3) 0%, transparent 70%);
+  border-radius:50%;
+  animation:pulseGlow 3s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%,100% { transform:scale(1); opacity:0.6; }
+  50% { transform:scale(1.1); opacity:1; }
+}
+
+/* 徽章主体 */
+.badge-main {
+  position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(120,60,200,0.4) 0%, rgba(60,20,120,0.3) 100%);
+  border:2px solid rgba(167,139,250,0.5);
+  border-radius:30px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 0 60px rgba(167,139,250,0.3), inset 0 0 30px rgba(167,139,250,0.1);
+}
+
+/* 顶部皇冠 */
+.badge-crown {
+  position:absolute; top:-25px;
+  font-size:40px;
+  filter:drop-shadow(0 0 10px rgba(253,230,138,0.6));
+}
+
+/* 星星图标 */
+.badge-star {
+  font-size:60px;
+  margin-bottom:8px;
+  filter:drop-shadow(0 0 20px rgba(253,230,138,0.8));
+}
+
+/* 综合评分 */
+.badge-score {
+  font-size:48px; font-weight:800;
+  background:linear-gradient(135deg,#fff 30%,#fde68a);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  line-height:1;
+}
+
+.badge-label {
+  font-size:14px; color:rgba(255,255,255,0.6);
+  margin-top:4px;
+}
+
+/* 装饰翅膀 */
+.badge-wing-left,
+.badge-wing-right {
+  position:absolute;
+  top:50%; transform:translateY(-50%);
+  font-size:30px;
+  opacity:0.6;
+}
+.badge-wing-left { left:-25px; }
+.badge-wing-right { right:-25px; }
+
+/* 标题 */
+.main-title {
+  font-size:24px; font-weight:700;
+  color:#fff; letter-spacing:1px;
+  margin-bottom:16px;
+}
+
+/* 副标题 */
+.sub-title {
+  font-size:14px; color:rgba(255,255,255,0.5);
+  text-align:center;
+  line-height:1.8;
+  margin-bottom:8px;
+}
+
+.date-text {
+  font-size:13px; color:rgba(167,139,250,0.7);
+  margin-bottom:48px;
+}
+
+/* 主按钮 */
+.primary-btn {
+  width:280px; height:56px;
+  border:none; border-radius:28px;
+  cursor:pointer;
+  font-size:17px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#f87171,#fb7185);
+  box-shadow:0 8px 32px rgba(248,113,113,0.4);
+  letter-spacing:1px;
+  margin-bottom:20px;
+  transition:transform 0.2s ease;
+}
+.primary-btn:active { transform:scale(0.97); }
+
+/* 次要链接 */
+.secondary-link {
+  font-size:14px; color:rgba(255,255,255,0.5);
+  cursor:pointer;
+  text-decoration:none;
+}
+.secondary-link:hover { color:rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="page-bg"></div>
+  <div class="nebula"></div>
+  <div class="stars-layer"></div>
+
+  <div class="scroll-content">
+
+    <!-- 顶部用户信息 -->
+    <div class="user-info-row">
+      <div class="user-avatar">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+      </div>
+      <div class="user-name">小鹿</div>
+      <div class="back-btn" onclick="history.back()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+    </div>
+
+    <!-- 运势标语 -->
+    <div class="fortune-slogan">今天运势超级好，好运连连！</div>
+
+    <!-- 运势徽章 -->
+    <div class="fortune-badge">
+      <div class="badge-glow"></div>
+      <div class="badge-wing-left">✨</div>
+      <div class="badge-wing-right">✨</div>
+
+      <div class="badge-main">
+        <div class="badge-star">⭐</div>
+        <div class="badge-score">92</div>
+        <div class="badge-label">综合运势</div>
+      </div>
+    </div>
+
+    <!-- 标题 -->
+    <div class="main-title">今日运势</div>
+
+    <!-- 副标题 -->
+    <div class="sub-title">
+      根据生日测算 · 三维度运势分析<br>
+      爱情运 100 · 学业/事业运 82 · 财富运 91
+    </div>
+
+    <div class="date-text">2026年5月11日 · 白羊座</div>
+
+    <!-- 按钮 -->
+    <button class="primary-btn" onclick="location.href='0测算方式选择页.html'">
+      我也要测运势
+    </button>
+
+  </div>
+
+</div>
+
+</body>
+</html>

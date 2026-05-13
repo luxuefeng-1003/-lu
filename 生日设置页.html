@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Screen 01b - 出生信息</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#0a0a14;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+/* ── 手机外壳 ── */
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+}
+
+/* ── 背景：第二页相同背景，模糊处理 ── */
+.page-bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 200% 60% at 50% 0%, #2a0f5e 0%, transparent 60%),
+    radial-gradient(ellipse 100% 40% at 80% 30%, #1a0a40 0%, transparent 50%),
+    linear-gradient(180deg, #0d0620 0%, #10082a 30%, #0a0618 60%, #060412 100%);
+  filter: blur(4px) brightness(0.6);
+  transform: scale(1.05);
+}
+.nebula {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  filter: blur(4px);
+  background:
+    radial-gradient(ellipse 180px 100px at 30% 18%, rgba(120,60,220,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 120px 80px at 75% 12%, rgba(180,100,255,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 80px 60px at 55% 8%, rgba(255,200,100,0.1) 0%, transparent 70%);
+}
+.stars-layer {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 6%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 22% 4%, rgba(255,230,150,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 9%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 5%, rgba(200,180,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 7%, rgba(255,230,150,0.4) 0%, transparent 100%);
+}
+
+/* ── 暗色遮罩层 ── */
+.overlay {
+  position:absolute; inset:0; z-index:5;
+  background:rgba(5,2,15,0.55);
+}
+
+/* ── 状态栏 ── */
+.status-bar {
+  position:absolute; top:0; left:0; right:0;
+  height:50px; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 26px 0;
+}
+.s-time { font-size:15px; font-weight:600; color:rgba(255,255,255,0.85); letter-spacing:0.2px; }
+.s-icons { display:flex; align-items:center; gap:5px; }
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:rgba(255,255,255,0.8); border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;}
+.sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:rgba(255,255,255,0.8); border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid rgba(255,255,255,0.8); border-bottom:none; border-radius:8px 8px 0 0; }
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.65); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.55); border-radius:0 1px 1px 0; }
+.bat-fill { background:rgba(255,255,255,0.8); border-radius:1px; height:100%; width:82%; }
+
+/* ── 主体内容容器 ── */
+.main-wrap {
+  position:absolute; inset:0; z-index:10;
+  display:flex; flex-direction:column;
+  padding:0 0 0;
+}
+
+/* ── 顶部标题区 ── */
+.header {
+  padding:70px 28px 0;
+  display:flex; flex-direction:column; gap:6px;
+}
+.back-btn {
+  position:absolute; top:58px; left:20px;
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.7);
+  cursor:pointer;
+}
+.title-label {
+  font-size:12px; font-weight:500; letter-spacing:3px;
+  color:rgba(167,139,250,0.8); text-transform:uppercase;
+  text-align:center; margin-bottom:2px;
+}
+.title-main {
+  font-size:24px; font-weight:700;
+  color:#fff; text-align:center; line-height:1.3;
+}
+.title-sub {
+  font-size:14px; color:rgba(255,255,255,0.45);
+  text-align:center; margin-top:4px;
+}
+
+/* ── 分隔线 ── */
+.sep {
+  width:40px; height:2px; border-radius:1px;
+  background:linear-gradient(90deg,transparent,rgba(167,139,250,0.6),transparent);
+  margin:14px auto 0;
+}
+
+/* ── Picker 容器 ── */
+.picker-wrap {
+  flex:1;
+  display:flex; align-items:center; justify-content:center;
+  padding:0 16px;
+  position:relative;
+}
+
+/* 选中高亮遮罩（上下渐变fade） */
+.picker-fade-top {
+  position:absolute; top:0; left:16px; right:16px;
+  height:120px;
+  background:linear-gradient(180deg, rgba(8,4,20,0.92) 0%, transparent 100%);
+  z-index:5; pointer-events:none; border-radius:20px 20px 0 0;
+}
+.picker-fade-bottom {
+  position:absolute; bottom:0; left:16px; right:16px;
+  height:120px;
+  background:linear-gradient(0deg, rgba(8,4,20,0.92) 0%, transparent 100%);
+  z-index:5; pointer-events:none; border-radius:0 0 20px 20px;
+}
+
+/* 选中行高亮框 */
+.picker-selector {
+  position:absolute; left:16px; right:16px;
+  top:50%; transform:translateY(-50%);
+  height:48px; z-index:6; pointer-events:none;
+  border-top:1px solid rgba(167,139,250,0.35);
+  border-bottom:1px solid rgba(167,139,250,0.35);
+  background:rgba(167,139,250,0.06);
+}
+.picker-selector::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg,#a78bfa,#e879f9); border-radius:2px 0 0 2px;
+}
+.picker-selector::after {
+  content:''; position:absolute; right:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg,#a78bfa,#e879f9); border-radius:0 2px 2px 0;
+}
+
+/* Picker 内层 */
+.picker-inner {
+  width:100%;
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:20px;
+  height:288px;
+  display:flex; overflow:hidden;
+  position:relative;
+}
+
+/* 每列 */
+.picker-col {
+  flex:1;
+  display:flex; flex-direction:column;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+}
+.picker-col + .picker-col {
+  border-left:1px solid rgba(255,255,255,0.05);
+}
+
+/* 列标题 */
+.col-label {
+  position:absolute; top:0; left:0; right:0; z-index:8;
+  text-align:center;
+  font-size:10px; font-weight:500; letter-spacing:1px;
+  color:rgba(167,139,250,0.6);
+  padding:8px 0 4px;
+  background:rgba(8,4,20,0.5);
+}
+
+/* 滚动列表 */
+.col-list {
+  display:flex; flex-direction:column; align-items:center;
+  padding:108px 0;
+  cursor:grab;
+  user-select:none;
+}
+.col-list.dragging { cursor:grabbing; }
+
+.col-item {
+  height:48px; min-height:48px;
+  display:flex; align-items:center; justify-content:center;
+  width:100%;
+  font-size:16px; font-weight:400;
+  color:rgba(255,255,255,0.3);
+  transition:color 0.15s, font-size 0.15s, font-weight 0.15s;
+  flex-shrink:0;
+  cursor:pointer;
+}
+.col-item.selected {
+  color:#fff; font-size:19px; font-weight:700;
+  text-shadow:0 0 12px rgba(167,139,250,0.6);
+}
+.col-item.near {
+  color:rgba(255,255,255,0.65); font-size:17px; font-weight:500;
+}
+.col-item.far {
+  color:rgba(255,255,255,0.18);
+}
+
+/* ── 底部按钮 ── */
+.bottom-area {
+  padding:16px 20px 32px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.btn-confirm {
+  width:100%; height:52px; border:none; border-radius:14px; cursor:pointer;
+  font-size:16px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#7c3aed,#a855f7,#c026d3);
+  box-shadow:0 4px 24px rgba(124,58,237,0.45);
+  letter-spacing:0.3px; position:relative; overflow:hidden;
+}
+.btn-confirm::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.12) 0%,transparent 100%);
+}
+.btn-skip {
+  width:100%; height:44px; border:none; background:none; cursor:pointer;
+  font-size:14px; color:rgba(255,255,255,0.35); font-weight:400;
+  letter-spacing:0.5px;
+}
+
+/* ── home bar ── */
+.home-bar {
+  position:absolute; bottom:7px; left:50%; transform:translateX(-50%);
+  width:130px; height:4px;
+  background:rgba(255,255,255,0.2); border-radius:2px;
+  z-index:20;
+}
+/* ── 运势抽卡动效遮罩 ── */
+#ritualOverlay {
+  position:absolute; inset:0; z-index:100;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(ellipse 120% 80% at 50% 40%, #1e0a4a 0%, #0a0520 60%, #040212 100%);
+  opacity:0; pointer-events:none;
+  transition:opacity 0.4s;
+}
+#ritualOverlay.show { opacity:1; pointer-events:all; }
+
+/* 星粒背景 */
+.ritual-stars { position:absolute; inset:0; overflow:hidden; }
+.ritual-star {
+  position:absolute; border-radius:50%; background:#fff;
+  animation:rStar var(--d,2s) var(--dl,0s) infinite ease-in-out alternate;
+}
+@keyframes rStar { 0%{opacity:var(--o1,0.1);transform:scale(0.8);} 100%{opacity:var(--o2,0.8);transform:scale(1.2);} }
+
+/* 光晕圆环 */
+.ritual-ring {
+  width:220px; height:220px; border-radius:50%;
+  border:1.5px solid rgba(167,139,250,0.3);
+  position:absolute;
+  animation:ringExpand 0.8s var(--dl,0s) cubic-bezier(0.22,1,0.36,1) forwards;
+  opacity:0;
+}
+@keyframes ringExpand {
+  from { transform:scale(0.3); opacity:0; }
+  to   { transform:scale(1);   opacity:1; }
+}
+
+/* 卡牌容器 */
+.ritual-card-wrap {
+  width:220px; height:220px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* 单张抽卡 */
+.ritual-card {
+  position:absolute;
+  width:100px; height:160px; border-radius:16px;
+  background:linear-gradient(160deg,#3b1275 0%,#1a0840 100%);
+  border:1.5px solid rgba(167,139,250,0.5);
+  box-shadow:0 0 30px rgba(124,58,237,0.5), 0 0 60px rgba(124,58,237,0.2);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0;
+  transform-origin:bottom center;
+}
+.ritual-card::before {
+  content:'✦'; font-size:32px; color:rgba(167,139,250,0.6);
+  text-shadow:0 0 20px rgba(167,139,250,0.8);
+}
+
+/* 三张牌展开动画 */
+.ritual-card.c1 { animation:card1 0.7s 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.ritual-card.c2 { animation:card2 0.7s 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.ritual-card.c3 { animation:card3 0.7s 0.9s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+@keyframes card1 {
+  from { opacity:0; transform:rotate(0deg) translateY(40px) scale(0.6); }
+  to   { opacity:1; transform:rotate(-18deg) translateY(-30px) scale(1); }
+}
+@keyframes card2 {
+  from { opacity:0; transform:rotate(0deg) translateY(40px) scale(0.6); }
+  to   { opacity:1; transform:rotate(0deg) translateY(-50px) scale(1.05); }
+}
+@keyframes card3 {
+  from { opacity:0; transform:rotate(0deg) translateY(40px) scale(0.6); }
+  to   { opacity:1; transform:rotate(18deg) translateY(-30px) scale(1); }
+}
+
+/* 光爆效果 */
+.ritual-flash {
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle, rgba(167,139,250,0.8) 0%, transparent 70%);
+  opacity:0; transform:scale(0.2);
+  animation:flash 0.5s 1.4s ease-out forwards;
+}
+@keyframes flash {
+  0%   { opacity:1; transform:scale(0.2); }
+  50%  { opacity:0.6; transform:scale(1.5); }
+  100% { opacity:0; transform:scale(2.5); }
+}
+
+/* 文字提示 */
+.ritual-text {
+  margin-top:24px; text-align:center;
+  font-size:15px; color:rgba(167,139,250,0.9);
+  font-weight:500; letter-spacing:2px;
+  opacity:0; transform:translateY(12px);
+  animation:fadeUpTxt 0.6s 1.0s ease-out forwards;
+}
+.ritual-text2 {
+  margin-top:8px; font-size:12px; color:rgba(255,255,255,0.4);
+  letter-spacing:1px;
+  opacity:0; transform:translateY(8px);
+  animation:fadeUpTxt 0.6s 1.2s ease-out forwards;
+}
+@keyframes fadeUpTxt {
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- 背景层（模糊版第二页背景） -->
+  <div class="page-bg"></div>
+  <div class="nebula"></div>
+  <div class="stars-layer"></div>
+  <div class="overlay"></div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="s-time">09:41</span>
+    <div class="s-icons">
+      <div class="sig"><b></b><b></b><b></b><b></b></div>
+      <div class="wifi"></div>
+      <div class="bat"><div class="bat-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- 返回按钮 -->
+  <div class="back-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </div>
+
+  <!-- 主体 -->
+  <div class="main-wrap">
+
+    <!-- 标题区 -->
+    <div class="header">
+      <div class="title-label">Birth Info</div>
+      <div class="title-main">你的出生时间</div>
+      <div class="sep"></div>
+    </div>
+
+    <!-- Picker 区域 -->
+    <div class="picker-wrap">
+      <div class="picker-fade-top"></div>
+      <div class="picker-fade-bottom"></div>
+      <div class="picker-selector"></div>
+
+      <div class="picker-inner" id="pickerInner">
+
+        <!-- 年 -->
+        <div class="picker-col" id="col-year">
+          <div class="col-label">年</div>
+          <div class="col-list" id="list-year"></div>
+        </div>
+
+        <!-- 月 -->
+        <div class="picker-col" id="col-month">
+          <div class="col-label">月</div>
+          <div class="col-list" id="list-month"></div>
+        </div>
+
+        <!-- 日 -->
+        <div class="picker-col" id="col-day">
+          <div class="col-label">日</div>
+          <div class="col-list" id="list-day"></div>
+        </div>
+
+        <!-- 时 -->
+        <div class="picker-col" id="col-hour">
+          <div class="col-label">时</div>
+          <div class="col-list" id="list-hour"></div>
+        </div>
+
+        <!-- 分 -->
+        <div class="picker-col" id="col-min">
+          <div class="col-label">分</div>
+          <div class="col-list" id="list-min"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="bottom-area">
+      <button class="btn-confirm" id="confirmBtn" onclick="startRitual()">查看我的今日运势</button>
+      <button class="btn-skip" onclick="location.href='生日空态页.html'">跳过，暂不设置</button>
+    </div>
+
+  </div>
+
+  <div class="home-bar"></div>
+
+  <!-- ── 抽卡仪式动效遮罩 ── -->
+  <div id="ritualOverlay">
+    <!-- 星粒 -->
+    <div class="ritual-stars" id="ritualStars"></div>
+
+    <!-- 光晕圆环 -->
+    <div class="ritual-ring" style="--dl:0.3s; width:180px;height:180px; border-color:rgba(167,139,250,0.2);"></div>
+    <div class="ritual-ring" style="--dl:0.4s; width:240px;height:240px; border-color:rgba(167,139,250,0.15);"></div>
+    <div class="ritual-ring" style="--dl:0.5s; width:300px;height:300px; border-color:rgba(167,139,250,0.08);"></div>
+
+    <!-- 三张卡牌 -->
+    <div class="ritual-card-wrap">
+      <div class="ritual-flash"></div>
+      <div class="ritual-card c1"></div>
+      <div class="ritual-card c2"></div>
+      <div class="ritual-card c3"></div>
+    </div>
+
+    <!-- 文字提示 -->
+    <div class="ritual-text">✦ 正在解读你的命运 ✦</div>
+    <div class="ritual-text2">天象已就位，运势即将揭晓...</div>
+  </div>
+
+</div>
+
+<script>
+// ── 工具函数 ──
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ── 构建数据 ──
+const now = new Date();
+const YEARS  = Array.from({length:101}, (_,i) => now.getFullYear() - 100 + i);
+const MONTHS = Array.from({length:12},  (_,i) => pad(i+1));
+const DAYS   = Array.from({length:31},  (_,i) => pad(i+1));
+const HOURS  = Array.from({length:24},  (_,i) => pad(i));
+const MINS   = Array.from({length:60},  (_,i) => pad(i));
+
+// 默认选中：2000年1月1日 00:00
+const selected = {
+  year: now.getFullYear() - 26,
+  month: 1,
+  day: 1,
+  hour: 0,
+  min: 0
+};
+
+const ITEM_H = 48; // px，与CSS .col-item height 一致
+
+// ── 初始化每列 ──
+function buildCol(listId, items, initIdx) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  items.forEach((v, i) => {
+    const div = document.createElement('div');
+    div.className = 'col-item';
+    div.textContent = v;
+    div.dataset.idx = i;
+    list.appendChild(div);
+  });
+  scrollToIdx(list, initIdx, false);
+  attachDrag(list, items.length);
+}
+
+function scrollToIdx(list, idx, animate) {
+  const offset = -idx * ITEM_H;
+  list.style.transition = animate ? 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none';
+  list.style.transform = `translateY(${offset}px)`;
+  updateHighlight(list, idx);
+}
+
+function updateHighlight(list, centerIdx) {
+  const items = list.querySelectorAll('.col-item');
+  items.forEach((el, i) => {
+    const diff = Math.abs(i - centerIdx);
+    el.className = 'col-item' + (diff === 0 ? ' selected' : diff === 1 ? ' near' : ' far');
+  });
+}
+
+function getIdxFromTransform(list) {
+  const t = list.style.transform;
+  const m = t.match(/translateY\((-?[\d.]+)px\)/);
+  return m ? Math.round(-parseFloat(m[1]) / ITEM_H) : 0;
+}
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function attachDrag(list, count) {
+  let startY = 0, startTranslate = 0, isDragging = false, velocity = 0, lastY = 0, lastTime = 0;
+
+  const getTranslate = () => {
+    const m = (list.style.transform||'').match(/translateY\((-?[\d.]+)px\)/);
+    return m ? parseFloat(m[1]) : 0;
+  };
+
+  const snap = () => {
+    const raw = getTranslate();
+    const idx = clamp(Math.round(-raw / ITEM_H), 0, count - 1);
+    scrollToIdx(list, idx, true);
+    syncSelected(list);
+  };
+
+  list.addEventListener('mousedown', e => {
+    isDragging = true;
+    startY = e.clientY;
+    startTranslate = getTranslate();
+    velocity = 0; lastY = e.clientY; lastTime = Date.now();
+    list.style.transition = 'none';
+    list.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  list.addEventListener('touchstart', e => {
+    isDragging = true;
+    startY = e.touches[0].clientY;
+    startTranslate = getTranslate();
+    velocity = 0; lastY = e.touches[0].clientY; lastTime = Date.now();
+    list.style.transition = 'none';
+  }, {passive:true});
+
+  const onMove = (clientY) => {
+    if (!isDragging) return;
+    const now = Date.now();
+    velocity = (clientY - lastY) / (now - lastTime || 1) * 16;
+    lastY = clientY; lastTime = now;
+    const delta = clientY - startY;
+    const maxTranslate = 0;
+    const minTranslate = -(count - 1) * ITEM_H;
+    const newT = clamp(startTranslate + delta, minTranslate, maxTranslate);
+    list.style.transform = `translateY(${newT}px)`;
+    updateHighlight(list, Math.round(-newT / ITEM_H));
+  };
+
+  document.addEventListener('mousemove', e => onMove(e.clientY));
+  list.addEventListener('touchmove', e => onMove(e.touches[0].clientY), {passive:true});
+
+  const onEnd = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    list.classList.remove('dragging');
+    // 惯性
+    const raw = getTranslate() + velocity * 6;
+    const idx = clamp(Math.round(-raw / ITEM_H), 0, count - 1);
+    scrollToIdx(list, idx, true);
+    syncSelected(list);
+  };
+
+  document.addEventListener('mouseup', onEnd);
+  list.addEventListener('touchend', onEnd);
+}
+
+function syncSelected(list) {
+  // 根据list id更新selected对象
+  const id = list.id;
+  const idx = getIdxFromTransform(list);
+  if (id === 'list-year')  selected.year  = YEARS[idx];
+  if (id === 'list-month') selected.month = idx + 1;
+  if (id === 'list-day')   selected.day   = idx + 1;
+  if (id === 'list-hour')  selected.hour  = idx;
+  if (id === 'list-min')   selected.min   = idx;
+}
+
+// ── 初始化 ──
+buildCol('list-year',  YEARS.map(String),     YEARS.indexOf(selected.year));
+buildCol('list-month', MONTHS,                 selected.month - 1);
+buildCol('list-day',   DAYS,                   selected.day - 1);
+buildCol('list-hour',  HOURS,                  selected.hour);
+buildCol('list-min',   MINS,                   selected.min);
+
+// ── 抽卡仪式动效 ──
+function startRitual() {
+  // 生成星粒
+  const starsEl = document.getElementById('ritualStars');
+  if (!starsEl.childNodes.length) {
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      s.className = 'ritual-star';
+      const size = Math.random() * 2.5 + 0.8;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random()*100}%; top:${Math.random()*100}%;
+        --d:${(Math.random()*2+1.5).toFixed(1)}s;
+        --dl:${(Math.random()*2).toFixed(1)}s;
+        --o1:${(Math.random()*0.2+0.05).toFixed(2)};
+        --o2:${(Math.random()*0.6+0.4).toFixed(2)};
+      `;
+      starsEl.appendChild(s);
+    }
+  }
+  const overlay = document.getElementById('ritualOverlay');
+  overlay.classList.add('show');
+  setTimeout(() => { location.href = '今日运势主页.html'; }, 2500);
+}
+</script>
+</body>
+</html>

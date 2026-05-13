@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Screen 05 - 财富塔罗</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#0a0a14;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+  background:#050210;
+}
+
+/* 背景 */
+.bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 200% 60% at 50% 0%, #1a1005 0%, transparent 55%),
+    radial-gradient(ellipse 100% 50% at 20% 50%, #1a0e00 0%, transparent 50%),
+    linear-gradient(180deg, #080402 0%, #0a0605 40%, #060404 100%);
+}
+.nebula {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 200px 120px at 50% 38%, rgba(251,191,36,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 150px 100px at 25% 20%, rgba(245,158,11,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 100px 80px at 80% 15%, rgba(251,191,36,0.06) 0%, transparent 70%);
+}
+.stars-layer {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 6%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 22% 4%, rgba(251,191,36,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 9%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 5%, rgba(251,191,36,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 22%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 25%, rgba(251,191,36,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 50% 3%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 8%, rgba(251,191,36,0.6) 0%, transparent 100%);
+}
+
+/* 状态栏 */
+.status-bar {
+  position:absolute; top:0; left:0; right:0; height:50px; z-index:30;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 26px 0;
+}
+.s-time { font-size:15px; font-weight:600; color:rgba(255,255,255,0.85); }
+.s-icons { display:flex; align-items:center; gap:5px; }
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:rgba(255,255,255,0.8); border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;}
+.sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:rgba(255,255,255,0.8); border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid rgba(255,255,255,0.8); border-bottom:none; border-radius:8px 8px 0 0; }
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.65); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.55); border-radius:0 1px 1px 0; }
+.bat-fill { background:rgba(255,255,255,0.8); border-radius:1px; height:100%; width:82%; }
+
+/* 顶部标题 */
+.page-header {
+  position:absolute; top:50px; left:0; right:0; z-index:20;
+  height:56px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+}
+.back-btn {
+  position:absolute; left:16px; top:50%; transform:translateY(-50%);
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.55); cursor:pointer;
+}
+.header-title {
+  font-size:17px; font-weight:700; letter-spacing:2px;
+  background:linear-gradient(90deg,#fde68a,#fbbf24,#f59e0b);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.header-sub { font-size:11px; color:rgba(251,191,36,0.5); letter-spacing:1.5px; }
+
+/* ── 星盘舞台（固定在中央） ── */
+.stage {
+  position:absolute;
+  top:106px; left:0; right:0; bottom:180px;
+  z-index:10;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center;
+}
+
+/* 星盘容器 */
+.astrolabe {
+  position:relative;
+  width:320px; height:320px;
+}
+
+/* 星盘底圆 */
+.astro-bg {
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(ellipse at center,
+    rgba(251,191,36,0.12) 0%,
+    rgba(245,158,11,0.05) 45%,
+    transparent 70%
+  );
+  border:1px solid rgba(251,191,36,0.18);
+}
+/* 内圈 */
+.astro-inner {
+  position:absolute; inset:45px; border-radius:50%;
+  border:1px solid rgba(251,191,36,0.1);
+}
+.astro-inner2 {
+  position:absolute; inset:85px; border-radius:50%;
+  border:1px dashed rgba(251,191,36,0.08);
+  animation:astroRot 20s linear infinite;
+}
+@keyframes astroRot { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+/* 星盘中心 */
+.astro-center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:60px; height:60px; border-radius:50%;
+  background:radial-gradient(ellipse at 40% 40%,
+    rgba(251,191,36,0.28) 0%,
+    rgba(180,110,0,0.12) 50%,
+    rgba(60,30,0,0.15) 100%
+  );
+  border:2px solid rgba(251,191,36,0.45);
+  box-shadow:0 0 20px rgba(251,191,36,0.25), inset 0 0 12px rgba(251,191,36,0.08);
+  display:flex; align-items:center; justify-content:center;
+  z-index:5;
+}
+.astro-center-symbol {
+  font-size:24px; line-height:1;
+  filter:drop-shadow(0 0 6px rgba(251,191,36,0.7));
+}
+
+/* 旋转光晕 */
+.spin-halo {
+  position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(
+    rgba(251,191,36,0.4) 0deg,
+    rgba(245,158,11,0.15) 90deg,
+    rgba(251,191,36,0.04) 180deg,
+    rgba(251,191,36,0.4) 360deg
+  );
+  animation:astroRot 5s linear infinite;
+  -webkit-mask:radial-gradient(ellipse at center, transparent 138px, black 140px);
+  mask:radial-gradient(ellipse at center, transparent 138px, black 140px);
+}
+
+/* 顶点光点 */
+.astro-dot {
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:#fbbf24; box-shadow:0 0 6px #fbbf24;
+  animation:dotPulse 2s ease-in-out infinite;
+  z-index:4;
+}
+@keyframes dotPulse { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
+
+/* ── 圆周运动卡片 ── */
+.orbit-card {
+  position:absolute;
+  width:48px; height:74px;
+  border-radius:7px;
+  background:linear-gradient(145deg,#2a1400 0%,#3d2000 45%,#1a0d00 100%);
+  border:1.5px solid rgba(251,191,36,0.5);
+  box-shadow:0 3px 14px rgba(200,120,0,0.3), 0 0 0 0.5px rgba(251,191,36,0.12);
+  overflow:hidden;
+  transform-origin:center center;
+  z-index:3;
+}
+.orbit-card::before {
+  content:''; position:absolute; inset:4px;
+  border:1px solid rgba(251,191,36,0.18); border-radius:4px;
+}
+.orbit-card::after {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 24px 38px at 50% 40%, rgba(251,191,36,0.08) 0%,transparent 70%),
+    repeating-linear-gradient(45deg, rgba(251,191,36,0.02) 0px, rgba(251,191,36,0.02) 1px, transparent 1px, transparent 7px);
+}
+
+/* 卡片背面符文 */
+.card-back-emblem {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; opacity:0.35;
+  filter:drop-shadow(0 0 3px rgba(251,191,36,0.4));
+}
+
+/* 卡片正面内容（隐藏状态） */
+.card-face {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  opacity:0;
+  background:linear-gradient(160deg,#2a1500,#1a0e00);
+  padding:3px;
+  transition:opacity 0.4s ease;
+}
+.card-face-symbol { font-size:16px; line-height:1; }
+.card-face-name { font-size:7px; color:rgba(251,191,36,0.75); letter-spacing:0.3px; text-align:center; }
+
+/* 停止后显示正面 */
+.orbit-card.revealed .card-face { opacity:1; }
+.orbit-card.revealed .card-back-emblem { opacity:0; }
+.orbit-card.revealed {
+  border-color:rgba(251,191,36,0.8);
+  box-shadow:0 0 16px rgba(251,191,36,0.4), 0 3px 14px rgba(200,120,0,0.35);
+}
+
+/* ── 提示文字 ── */
+.hint-text {
+  margin-top:20px;
+  font-size:13px; color:rgba(251,191,36,0.5); letter-spacing:1px;
+  text-align:center;
+  animation:textBreath 2s ease-in-out infinite;
+  transition:opacity 0.4s;
+}
+@keyframes textBreath { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.hint-text.hidden { opacity:0; pointer-events:none; }
+
+/* ── 底部固定操作区 ── */
+.bottom-actions {
+  position:absolute; bottom:20px; left:0; right:0; z-index:20;
+  padding:10px 16px 12px;
+  background:linear-gradient(0deg, rgba(5,2,8,0.98) 70%, transparent 100%);
+  display:flex; flex-direction:column; gap:10px;
+}
+
+/* 开始按钮在上方 */
+.btn-start {
+  width:100%; height:52px; border:none; border-radius:16px; cursor:pointer;
+  font-size:15px; font-weight:700; color:#1a0a00; letter-spacing:1px;
+  background:linear-gradient(135deg,#fde68a,#fbbf24,#f59e0b);
+  box-shadow:0 4px 20px rgba(251,191,36,0.5);
+  position:relative; overflow:hidden;
+  transition:all 0.3s ease;
+}
+.btn-start::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.2) 0%,transparent 100%);
+}
+.btn-start:active { transform:scale(0.97); }
+.btn-start.stop-mode {
+  background:linear-gradient(135deg,#ef4444,#dc2626);
+  color:#fff;
+  box-shadow:0 4px 20px rgba(239,68,68,0.5);
+}
+
+/* 双按钮行 */
+.btn-row {
+  display:flex; gap:10px;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.3s ease;
+}
+.btn-row.active { opacity:1; pointer-events:all; }
+.btn-primary {
+  flex:1; height:52px; border:none; border-radius:16px; cursor:pointer;
+  font-size:15px; font-weight:700; color:#fff; letter-spacing:0.5px;
+  background:linear-gradient(135deg,#1d4ed8,#3b82f6,#6366f1);
+  box-shadow:0 4px 20px rgba(59,130,246,0.45);
+  position:relative; overflow:hidden;
+  opacity:0.4; pointer-events:none;
+  transition:all 0.3s ease;
+}
+.btn-primary::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 100%);
+}
+.btn-primary.active { opacity:1; pointer-events:all; }
+.btn-primary.active:active { transform:scale(0.97); }
+
+.btn-secondary {
+  flex:1; height:52px; border-radius:16px; cursor:pointer;
+  font-size:15px; font-weight:600; color:rgba(255,255,255,0.75); letter-spacing:0.5px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  opacity:0.4; pointer-events:none;
+  transition:all 0.3s ease;
+}
+.btn-secondary.active { opacity:1; pointer-events:all; }
+.btn-secondary.active:active { transform:scale(0.97); }
+
+/* ── 结果展示区（停止后显示） ── */
+.result-panel {
+  position:absolute;
+  top:106px; left:0; right:0;
+  z-index:15;
+  padding:16px 16px 0;
+  opacity:0; pointer-events:none;
+  transform:translateY(20px);
+  transition:all 0.5s ease;
+}
+.result-panel.show {
+  opacity:1; pointer-events:all; transform:translateY(0);
+}
+
+.result-title-row {
+  display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.result-sparkle { font-size:16px; }
+.result-main-title {
+  font-size:16px; font-weight:700;
+  background:linear-gradient(90deg,#fde68a,#fbbf24);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+/* 三张牌横排 */
+.cards-row {
+  display:flex; gap:12px; justify-content:center; margin-bottom:14px;
+}
+.result-card {
+  flex:1; max-width:100px;
+  background:linear-gradient(160deg,#2a1500,#1a0e00);
+  border:1.5px solid rgba(251,191,36,0.6);
+  border-radius:10px;
+  padding:12px 8px 10px;
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  box-shadow:0 0 16px rgba(251,191,36,0.25);
+  animation:cardReveal 0.5s ease both;
+}
+.result-card:nth-child(2){ animation-delay:0.1s; }
+.result-card:nth-child(3){ animation-delay:0.2s; }
+@keyframes cardReveal {
+  from{ opacity:0; transform:translateY(10px) scale(0.95); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+.rc-symbol { font-size:28px; }
+.rc-name {
+  font-size:10px; font-weight:700; color:rgba(251,191,36,0.9);
+  letter-spacing:0.5px; text-align:center;
+}
+.rc-pos { font-size:9px; color:rgba(255,255,255,0.4); }
+
+/* 解读卡 */
+.reading-card {
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(251,191,36,0.15);
+  border-radius:16px; padding:14px 16px;
+  margin-bottom:10px;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.reading-header {
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+}
+.reading-icon {
+  width:28px; height:28px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.reading-title { font-size:13px; font-weight:700; color:rgba(255,255,255,0.85); }
+.reading-body { font-size:13px; color:rgba(255,255,255,0.6); line-height:1.8; }
+.reading-tag {
+  display:inline-flex; align-items:center;
+  background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.2);
+  border-radius:20px; padding:3px 10px; margin-top:8px;
+  font-size:11px; color:rgba(251,191,36,0.8);
+}
+
+/* ── 底部导航 ── */
+.nav-bar {
+  position:absolute; bottom:0; left:0; right:0;
+  height:100px; z-index:25;
+  background:rgba(5,2,8,0.9);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,0.06);
+  display:flex; align-items:flex-start; justify-content:space-around;
+  padding-top:14px;
+}
+.nav-item { display:flex; flex-direction:column; align-items:center; cursor:pointer; position:relative; }
+.nav-txt { font-size:14px; color:rgba(255,255,255,0.45); font-weight:400; }
+.nav-item.on .nav-txt { color:#fff; font-weight:600; }
+.nav-dot { width:4px; height:4px; background:#fbbf24; border-radius:50%; margin-top:4px; box-shadow:0 0 6px #fbbf24; }
+.live-tag {
+  position:absolute; top:-4px; right:-12px;
+  background:#e8143a; color:#fff; font-size:9px; font-weight:700;
+  padding:1px 5px; border-radius:6px;
+}
+.home-bar {
+  position:absolute; bottom:7px; left:50%; transform:translateX(-50%);
+  width:130px; height:4px;
+  background:rgba(255,255,255,0.2); border-radius:2px;
+}
+
+/* 进场 */
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+.stage { animation:fadeUp 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="bg"></div>
+  <div class="nebula"></div>
+  <div class="stars-layer"></div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="s-time">09:41</span>
+    <div class="s-icons">
+      <div class="sig"><b></b><b></b><b></b><b></b></div>
+      <div class="wifi"></div>
+      <div class="bat"><div class="bat-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- 顶部标题 -->
+  <div class="page-header">
+    <div class="back-btn" onclick="location.href='今日运势主页.html'">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </div>
+    <div class="header-title">财富 · 财运</div>
+    <div class="header-sub">WEALTH TAROT</div>
+  </div>
+
+  <!-- ── 星盘舞台 ── -->
+  <div class="stage" id="stage">
+
+    <div class="astrolabe" id="astrolabe">
+      <!-- 底层装饰 -->
+      <div class="astro-bg"></div>
+      <div class="astro-inner"></div>
+      <div class="astro-inner2"></div>
+      <div class="spin-halo" id="spinHalo"></div>
+
+      <!-- 顶点光点 -->
+      <div class="astro-dot" style="top:-2px;left:50%;transform:translateX(-50%);animation-delay:0s;"></div>
+      <div class="astro-dot" style="bottom:-2px;left:50%;transform:translateX(-50%);animation-delay:0.5s;"></div>
+      <div class="astro-dot" style="left:-2px;top:50%;transform:translateY(-50%);animation-delay:1s;"></div>
+      <div class="astro-dot" style="right:-2px;top:50%;transform:translateY(-50%);animation-delay:1.5s;"></div>
+
+      <!-- 圆周运动卡片 -->
+      <div class="orbit-card" id="card1">
+        <div class="card-back-emblem">☽</div>
+        <div class="card-face">
+          <div class="card-face-symbol">💰</div>
+          <div class="card-face-name">财星高照</div>
+        </div>
+      </div>
+      <div class="orbit-card" id="card2">
+        <div class="card-back-emblem">✦</div>
+        <div class="card-face">
+          <div class="card-face-symbol">📈</div>
+          <div class="card-face-name">节节攀升</div>
+        </div>
+      </div>
+      <div class="orbit-card" id="card3">
+        <div class="card-back-emblem">⋆</div>
+        <div class="card-face">
+          <div class="card-face-symbol">🪙</div>
+          <div class="card-face-name">金币丰盈</div>
+        </div>
+      </div>
+      <div class="orbit-card" id="card4">
+        <div class="card-back-emblem">◈</div>
+        <div class="card-face">
+          <div class="card-face-symbol">💎</div>
+          <div class="card-face-name">宝石运来</div>
+        </div>
+      </div>
+      <div class="orbit-card" id="card5">
+        <div class="card-back-emblem">☆</div>
+        <div class="card-face">
+          <div class="card-face-symbol">🌟</div>
+          <div class="card-face-name">幸运降临</div>
+        </div>
+      </div>
+      <div class="orbit-card" id="card6">
+        <div class="card-back-emblem">⟡</div>
+        <div class="card-face">
+          <div class="card-face-symbol">🔮</div>
+          <div class="card-face-name">水晶预言</div>
+        </div>
+      </div>
+
+      <!-- 中心 -->
+      <div class="astro-center">
+        <div class="astro-center-symbol">⚜</div>
+      </div>
+    </div>
+
+    <div class="hint-text" id="hintText">点击开始，转动命运之轮</div>
+  </div>
+
+  <!-- ── 结果展示（停止后出现） ── -->
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title-row">
+      <span class="result-sparkle">✦</span>
+      <span class="result-main-title">命运之牌已定，解读如下</span>
+      <span class="result-sparkle">✦</span>
+    </div>
+
+    <!-- 三张命运牌 -->
+    <div class="cards-row">
+      <div class="result-card">
+        <div class="rc-symbol">💰</div>
+        <div class="rc-name">财星高照</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-symbol">🌟</div>
+        <div class="rc-name">幸运降临</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-symbol">💎</div>
+        <div class="rc-name">宝石运来</div>
+      </div>
+    </div>
+
+    <!-- 解读 -->
+    <div class="reading-card">
+      <div class="reading-header">
+        <div class="reading-icon" style="background:rgba(251,191,36,0.12);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9 9h1a2 2 0 0 1 0 4H9m0 0h3a2 2 0 0 1 0 4H9"/></svg>
+        </div>
+        <div class="reading-title">今日财运综合解读</div>
+      </div>
+      <div class="reading-body">财富能量正向你涌来。过去积累的善缘与努力，正在转化为看得见的回报。当下是顺势而为的最佳时机，把握眼前机会不必犹豫。未来三个月将有一笔意外之财或重要合作浮出水面。</div>
+      <div class="reading-tag">💡 建议：今日宜主动出击，被动等待财运会打折</div>
+    </div>
+  </div>
+
+  <!-- ── 固定底部操作区 ── -->
+  <div class="bottom-actions">
+    <!-- 开始按钮在最上方 -->
+    <button class="btn-start" id="btnStart" onclick="handleStart()">▶ 开始</button>
+    
+    <!-- 双按钮行：制作运势视频 / 去分享 -->
+    <div class="btn-row">
+      <button class="btn-primary" id="btnVideo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:5px;vertical-align:-2px;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        制作运势视频
+      </button>
+      <button class="btn-secondary" id="btnShare" onclick="location.href='分享页.html'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:4px;vertical-align:-2px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        去分享
+      </button>
+    </div>
+  </div>
+
+  <!-- 底部导航已移除 -->
+
+  <div class="home-bar"></div>
+
+</div>
+
+<script>
+const astrolabe = document.getElementById('astrolabe');
+const spinHalo = document.getElementById('spinHalo');
+const btnStart = document.getElementById('btnStart');
+const btnVideo = document.getElementById('btnVideo');
+const btnShare = document.getElementById('btnShare');
+const hintText = document.getElementById('hintText');
+const resultPanel = document.getElementById('resultPanel');
+const stage = document.getElementById('stage');
+const cards = document.querySelectorAll('.orbit-card');
+
+let isRunning = false;
+let isStopped = false;
+let animationId = null;
+let angle = 0;
+let speed = 0;
+
+// 圆周运动参数
+const centerX = 160; // 星盘中心 X (320/2)
+const centerY = 160; // 星盘中心 Y
+const radius = 110;  // 圆周轨道半径
+const cardCount = 6;
+
+// 初始位置（静止）
+function positionCards() {
+  cards.forEach((card, i) => {
+    const cardAngle = (i * 360 / cardCount) + angle;
+    const rad = (cardAngle * Math.PI) / 180;
+    const x = centerX + radius * Math.cos(rad) - 24; // -24 是卡片宽度一半
+    const y = centerY + radius * Math.sin(rad) - 37; // -37 是卡片高度一半
+    card.style.left = x + 'px';
+    card.style.top = y + 'px';
+    // 卡片朝向中心
+    card.style.transform = `rotate(${cardAngle + 90}deg)`;
+  });
+}
+
+// 动画循环
+function animate() {
+  if (isRunning) {
+    angle += speed;
+    if (speed < 8) speed += 0.15; // 加速
+  } else if (speed > 0) {
+    speed *= 0.95; // 减速
+    angle += speed;
+    if (speed < 0.1) speed = 0;
+  }
+  
+  positionCards();
+  
+  if (isRunning || speed > 0) {
+    animationId = requestAnimationFrame(animate);
+  }
+}
+
+// 初始化
+positionCards();
+
+function handleStart() {
+  if (isStopped) return;
+
+  if (!isRunning) {
+    // 开始旋转
+    isRunning = true;
+    speed = 2;
+    spinHalo.style.animationPlayState = 'running';
+    document.querySelector('.astro-inner2').style.animationPlayState = 'running';
+    animate();
+    btnStart.textContent = '■ 停止';
+    btnStart.classList.add('stop-mode');
+    hintText.textContent = '命运之轮正在转动...';
+  } else {
+    // 停止
+    isRunning = false;
+    isStopped = true;
+    
+    // 减速停止
+    function slowDown() {
+      if (speed > 0.1) {
+        speed *= 0.92;
+        angle += speed;
+        positionCards();
+        requestAnimationFrame(slowDown);
+      } else {
+        speed = 0;
+        positionCards();
+        showResult();
+      }
+    }
+    slowDown();
+  }
+}
+
+function showResult() {
+  // 翻牌动画
+  cards.forEach((card, i) => {
+    setTimeout(() => {
+      card.classList.add('revealed');
+    }, i * 100);
+  });
+
+  // 更新按钮：隐藏开始按钮，显示分享按钮行
+  btnStart.style.display = 'none';
+  document.querySelector('.btn-row').classList.add('active');
+  btnVideo.classList.add('active');
+  btnShare.classList.add('active');
+  hintText.classList.add('hidden');
+
+  // 显示结果面板
+  setTimeout(() => {
+    stage.style.opacity = '0';
+    stage.style.transform = 'scale(0.88)';
+    stage.style.transition = 'all 0.5s ease';
+    resultPanel.classList.add('show');
+  }, 600);
+}
+
+function resetAll() {
+  isStopped = false;
+  isRunning = false;
+  speed = 0;
+  
+  // 还原舞台
+  stage.style.opacity = '1';
+  stage.style.transform = 'scale(1)';
+  resultPanel.classList.remove('show');
+
+  // 翻回背面
+  cards.forEach(card => card.classList.remove('revealed'));
+
+  // 重置动画状态
+  spinHalo.style.animationPlayState = 'paused';
+  document.querySelector('.astro-inner2').style.animationPlayState = 'paused';
+  positionCards();
+
+  btnStart.style.display = 'block';
+  btnStart.textContent = '▶ 开始';
+  btnStart.classList.remove('stop-mode');
+  btnStart.onclick = handleStart;
+  document.querySelector('.btn-row').classList.remove('active');
+  btnVideo.classList.remove('active');
+  btnShare.classList.remove('active');
+  hintText.classList.remove('hidden');
+  hintText.textContent = '点击开始，转动命运之轮';
+}
+
+// 初始暂停光晕动画
+spinHalo.style.animationPlayState = 'paused';
+document.querySelector('.astro-inner2').style.animationPlayState = 'paused';
+</script>
+
+</body>
+</html>

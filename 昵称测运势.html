@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>昵称测运势</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#0a0a14;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+}
+
+.page-bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 200% 60% at 50% 0%, #2a0f5e 0%, transparent 60%),
+    radial-gradient(ellipse 100% 40% at 80% 30%, #1a0a40 0%, transparent 50%),
+    linear-gradient(180deg, #0d0620 0%, #10082a 30%, #0a0618 60%, #060412 100%);
+}
+
+.nebula {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 180px 100px at 30% 18%, rgba(120,60,220,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 120px 80px at 75% 12%, rgba(180,100,255,0.12) 0%, transparent 70%);
+}
+
+.stars-layer {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 6%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 22% 4%, rgba(255,230,150,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 9%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 5%, rgba(200,180,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.5) 0%, transparent 100%);
+}
+
+.scroll-content {
+  position:absolute; inset:0; z-index:10;
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:0 20px 40px;
+}
+.scroll-content::-webkit-scrollbar { display:none; }
+
+.status-bar {
+  position:sticky; top:0; left:0; right:0;
+  height:50px; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 26px 0;
+  background:linear-gradient(180deg, rgba(13,6,32,0.98) 0%, rgba(13,6,32,0) 100%);
+}
+.s-time { font-size:15px; font-weight:600; color:rgba(255,255,255,0.9); }
+.s-icons { display:flex; align-items:center; gap:5px; }
+
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:rgba(255,255,255,0.85); border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;}
+.sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:rgba(255,255,255,0.85); border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid rgba(255,255,255,0.85); border-bottom:none; border-radius:8px 8px 0 0; }
+
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.7); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.6); border-radius:0 1px 1px 0; }
+.bat-fill { background:rgba(255,255,255,0.85); border-radius:1px; height:100%; width:82%; }
+
+/* ── 顶部操作栏 ── */
+.top-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 0 8px;
+}
+.top-btn {
+  border:none; background:none; cursor:pointer;
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+}
+.top-title {
+  font-size:18px; font-weight:700; color:#fff; letter-spacing:2px;
+}
+
+/* ── 中心区域 ── */
+.center-area {
+  display:flex; flex-direction:column; align-items:center;
+  padding:32px 0 20px;
+}
+
+.mascot-wrap {
+  width:120px; height:120px;
+  position:relative;
+  margin-bottom:28px;
+}
+.mascot-glow {
+  position:absolute; inset:-20px;
+  background:radial-gradient(circle, rgba(52,211,153,0.2) 0%, transparent 70%);
+  border-radius:50%;
+  animation:pulseGlow 3s ease-in-out infinite;
+}
+@keyframes pulseGlow {
+  0%,100% { transform:scale(1); opacity:0.6; }
+  50% { transform:scale(1.15); opacity:1; }
+}
+.mascot-icon {
+  width:120px; height:120px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; z-index:1;
+}
+
+.page-heading {
+  font-size:22px; font-weight:700; color:#fff;
+  letter-spacing:1px;
+  margin-bottom:8px;
+}
+.page-sub {
+  font-size:13px; color:rgba(255,255,255,0.5);
+  text-align:center;
+  line-height:1.7;
+}
+.inline-set-btn { display:inline; background:none; border:none; color:#34d399; font-size:13px; font-weight:500; cursor:pointer; padding:0 2px; text-decoration:underline; }
+
+/* ── 输入区 ── */
+.input-section {
+  margin:28px 0 20px;
+  width:100%;
+}
+.input-label {
+  font-size:13px; color:rgba(255,255,255,0.5);
+  margin-bottom:10px;
+  padding-left:4px;
+}
+.input-wrap {
+  position:relative;
+  width:100%;
+}
+.name-input {
+  width:100%; height:56px;
+  background:rgba(255,255,255,0.06);
+  border:1.5px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  color:#fff; font-size:17px; font-weight:500;
+  padding:0 52px 0 18px;
+  outline:none;
+  transition:border-color 0.25s ease;
+}
+.name-input::placeholder {
+  color:rgba(255,255,255,0.25);
+  font-weight:400;
+}
+.name-input:focus {
+  border-color:rgba(52,211,153,0.5);
+  background:rgba(255,255,255,0.08);
+}
+.input-icon {
+  position:absolute; right:16px; top:50%; transform:translateY(-50%);
+  opacity:0.4;
+}
+
+/* ── 提示标签 ── */
+.hint-tags {
+  display:flex; flex-wrap:wrap; gap:8px;
+  margin-top:14px;
+}
+.hint-tag {
+  font-size:12px; color:rgba(52,211,153,0.7);
+  background:rgba(52,211,153,0.1);
+  border:1px solid rgba(52,211,153,0.15);
+  border-radius:20px;
+  padding:5px 14px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+.hint-tag:active {
+  background:rgba(52,211,153,0.2);
+}
+
+/* ── 确认按钮 ── */
+.btn-confirm {
+  width:100%; height:56px;
+  border:none; border-radius:16px;
+  cursor:pointer;
+  font-size:17px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#10b981,#34d399,#6ee7b7);
+  box-shadow:0 6px 28px rgba(16,185,129,0.4);
+  letter-spacing:1px;
+  position:relative; overflow:hidden;
+  margin-top:24px;
+}
+.btn-confirm::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,0.15) 0%,transparent 100%);
+}
+.btn-confirm:active { transform:scale(0.97); }
+
+/* ── 底部说明 ── */
+.bottom-note {
+  text-align:center;
+  margin-top:28px;
+  font-size:12px; color:rgba(255,255,255,0.3);
+  line-height:1.8;
+}
+
+/* 设置生日按钮 */
+.btn-set-birthday {
+  width:100%; height:48px;
+  margin-top:16px;
+  border:1.5px solid rgba(167,139,250,0.3);
+  border-radius:12px;
+  cursor:pointer;
+  font-size:14px; font-weight:500; color:rgba(255,255,255,0.8);
+  background:rgba(167,139,250,0.08);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:all 0.2s ease;
+}
+.btn-set-birthday:hover {
+  background:rgba(167,139,250,0.15);
+  border-color:rgba(167,139,250,0.5);
+}
+
+/* ── ritual动画 ── */
+#ritualOverlay {
+  position:absolute; inset:0; z-index:100;
+  background:rgba(6,4,18,0.95);
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+#ritualOverlay.show { display:flex; }
+
+.ritual-cards {
+  display:flex; gap:16px;
+  perspective:800px;
+}
+.ritual-card {
+  width:90px; height:130px;
+  border-radius:12px;
+  background:linear-gradient(135deg, #1a0a40, #2a0f5e);
+  border:1px solid rgba(167,139,250,0.3);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0;
+  transform:translateY(40px) rotateY(30deg);
+}
+.ritual-card svg { opacity:0.7; }
+.ritual-card.show {
+  animation:cardReveal 0.6s ease forwards;
+}
+.ritual-card:nth-child(2).show { animation-delay:0.2s; }
+.ritual-card:nth-child(3).show { animation-delay:0.4s; }
+
+@keyframes cardReveal {
+  0% { opacity:0; transform:translateY(40px) rotateY(30deg); }
+  60% { opacity:1; transform:translateY(-10px) rotateY(-5deg); }
+  100% { opacity:1; transform:translateY(0) rotateY(0); }
+}
+
+.ritual-text {
+  color:rgba(255,255,255,0.6);
+  font-size:14px;
+  margin-top:24px;
+  opacity:0;
+}
+.ritual-text.show {
+  animation:fadeInUp 0.5s ease 0.8s forwards;
+}
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="page-bg"></div>
+  <div class="nebula"></div>
+  <div class="stars-layer"></div>
+
+  <div class="scroll-content">
+
+    <div class="status-bar">
+      <span class="s-time">09:41</span>
+      <div class="s-icons">
+        <div class="sig"><b></b><b></b><b></b><b></b></div>
+        <div class="wifi"></div>
+        <div class="bat"><div class="bat-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- 顶部操作栏 -->
+    <div class="top-bar">
+      <button class="top-btn" onclick="history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="top-title">✦ 昵称测运势 ✦</span>
+      <div style="width:36px;"></div>
+    </div>
+
+    <!-- 中心区域 -->
+    <div class="center-area">
+      <div class="mascot-wrap">
+        <div class="mascot-glow"></div>
+        <div class="mascot-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <defs>
+              <radialGradient id="mg" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#34d399" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <circle cx="40" cy="40" r="36" fill="url(#mg)"/>
+            <circle cx="40" cy="40" r="34" stroke="rgba(52,211,153,0.3)" stroke-width="1"/>
+            <!-- 人物图标 -->
+            <circle cx="40" cy="26" r="8" stroke="#34d399" stroke-width="1.5" fill="none"/>
+            <path d="M24 58c0-9 7-16 16-16s16 7 16 16" stroke="#34d399" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <!-- 装饰光点 -->
+            <circle cx="40" cy="26" r="3" fill="#34d399" opacity="0.4"/>
+            <circle cx="18" cy="18" r="1.5" fill="#6ee7b7" opacity="0.6"/>
+            <circle cx="62" cy="22" r="1" fill="#34d399" opacity="0.5"/>
+            <circle cx="56" cy="60" r="1.2" fill="#6ee7b7" opacity="0.4"/>
+            <circle cx="24" cy="56" r="1" fill="#34d399" opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="page-heading">输入你的昵称</div>
+      <div class="page-sub">当前结果依据用户昵称测算，如需精准测算<button class="inline-set-btn" onclick="location.href='0测算方式选择页.html'">设置生日</button>吧！</div>
+    </div>
+
+    <!-- 输入区 -->
+    <div class="input-section">
+      <div class="input-label">你的昵称</div>
+      <div class="input-wrap">
+        <input class="name-input" id="nameInput" type="text" placeholder="请输入昵称" maxlength="8" autocomplete="off">
+        <div class="input-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.6)" stroke-width="2" stroke-linecap="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hint-tags">
+        <span class="hint-tag" onclick="fillName('小鹿')">小鹿</span>
+        <span class="hint-tag" onclick="fillName('星星')">星星</span>
+        <span class="hint-tag" onclick="fillName('阿月')">阿月</span>
+        <span class="hint-tag" onclick="fillName('小北')">小北</span>
+      </div>
+    </div>
+
+    <button class="btn-confirm" onclick="startRitual()">查看我的今日运势</button>
+
+    <div class="bottom-note">
+      昵称仅用于运势解读<br>
+      不会保存或分享给他人
+    </div>
+
+    <!-- 底部操作按钮 -->
+    <div style="padding:16px 16px 32px;display:flex;gap:10px;">
+      <button style="flex:1;height:50px;border:none;border-radius:14px;cursor:pointer;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#a855f7,#c026d3);box-shadow:0 4px 28px rgba(124,58,237,0.5);letter-spacing:0.3px;position:relative;overflow:hidden;">
+        <span style="position:relative;z-index:1;">✦ 制作运势视频</span>
+      </button>
+    </div>
+
+  </div><!-- /scroll-content -->
+
+  <!-- ── ritual 过渡动画 ── -->
+  <div id="ritualOverlay">
+    <div class="ritual-cards">
+      <div class="ritual-card">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9 9h1a2 2 0 0 1 0 4H9m0 0h3a2 2 0 0 1 0 4H9"/></svg>
+      </div>
+      <div class="ritual-card">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </div>
+      <div class="ritual-card">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3"/></svg>
+      </div>
+    </div>
+    <div class="ritual-text">正在解读你的运势密码…</div>
+  </div>
+
+</div>
+
+<script>
+function fillName(name) {
+  document.getElementById('nameInput').value = name;
+  document.getElementById('nameInput').focus();
+}
+
+function startRitual() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) {
+    document.getElementById('nameInput').style.borderColor = 'rgba(248,113,113,0.6)';
+    setTimeout(() => {
+      document.getElementById('nameInput').style.borderColor = '';
+    }, 1500);
+    return;
+  }
+
+  const overlay = document.getElementById('ritualOverlay');
+  overlay.classList.add('show');
+
+  // 触发卡片动画
+  setTimeout(() => {
+    overlay.querySelectorAll('.ritual-card').forEach(c => c.classList.add('show'));
+    overlay.querySelector('.ritual-text').classList.add('show');
+  }, 100);
+
+  // 跳转
+  setTimeout(() => {
+    location.href = '昵称运势主页.html?nickname=' + encodeURIComponent(name);
+  }, 2200);
+}
+</script>
+
+</body>
+</html>

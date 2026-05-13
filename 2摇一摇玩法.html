@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Screen 04b - 事业学业摇一摇</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; background:#0a0a14;
+  font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;
+}
+
+/* ── 手机外壳 ── */
+.phone {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:50px;
+  box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9);
+  background:#050210;
+}
+
+/* ── 背景 ── */
+.bg {
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 200% 60% at 50% 0%, #0f1a5e 0%, transparent 60%),
+    radial-gradient(ellipse 100% 40% at 80% 30%, #0a1040 0%, transparent 50%),
+    linear-gradient(180deg, #07031a 0%, #0a0520 40%, #060215 100%);
+}
+.nebula {
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(ellipse 180px 100px at 30% 18%, rgba(60,80,200,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 120px 80px at 75% 12%, rgba(100,120,255,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 80px 60px at 55% 8%, rgba(150,180,255,0.08) 0%, transparent 70%);
+}
+.stars-layer {
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 6%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 22% 4%, rgba(147,197,253,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 9%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 60% 5%, rgba(196,181,253,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 7%, rgba(147,197,253,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 22%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 50% 3%, rgba(147,197,253,0.8) 0%, transparent 100%);
+}
+
+/* ── 状态栏 ── */
+.status-bar {
+  position:absolute; top:0; left:0; right:0; height:50px; z-index:30;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 26px 0;
+}
+.s-time { font-size:15px; font-weight:600; color:rgba(255,255,255,0.85); }
+.s-icons { display:flex; align-items:center; gap:5px; }
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:rgba(255,255,255,0.8); border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;}
+.sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:rgba(255,255,255,0.8); border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid rgba(255,255,255,0.8); border-bottom:none; border-radius:8px 8px 0 0; }
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.65); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.55); border-radius:0 1px 1px 0; }
+.bat-fill { background:rgba(255,255,255,0.8); border-radius:1px; height:100%; width:82%; }
+
+/* ── 顶部标题 ── */
+.page-header {
+  position:absolute; top:50px; left:0; right:0; z-index:20;
+  height:56px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+}
+.back-btn {
+  position:absolute; left:16px; top:50%; transform:translateY(-50%);
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  color:rgba(255,255,255,0.55); cursor:pointer;
+}
+.header-title {
+  font-size:17px; font-weight:700; letter-spacing:2px;
+  background:linear-gradient(90deg,#93c5fd,#818cf8,#c4b5fd);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.header-sub { font-size:11px; color:rgba(147,197,253,0.55); letter-spacing:1.5px; }
+
+/* ── 页面中央区域（状态栏+标题 共106px，底部nav 100px，剩余内容区） ── */
+.center-stage {
+  position:absolute;
+  top:106px; left:0; right:0; bottom:20px;
+  z-index:10;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:32px;
+}
+
+/* ── 装饰圆圈星盘 ── */
+.orbit-wrap {
+  position:relative;
+  width:260px; height:260px;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* 旋转光圈 */
+.orbit-ring {
+  position:absolute; border-radius:50%;
+  border:1px solid rgba(96,165,250,0.18);
+  animation:orbitRot 16s linear infinite;
+}
+.orbit-ring:nth-child(1){ inset:0; }
+.orbit-ring:nth-child(2){ inset:24px; border-color:rgba(129,140,248,0.12); animation-duration:10s; animation-direction:reverse; }
+.orbit-ring:nth-child(3){ inset:48px; border-color:rgba(96,165,250,0.08); border-style:dashed; animation-duration:24s; }
+@keyframes orbitRot { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+/* 光圈顶点小光点 */
+.orbit-dot {
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:#93c5fd; box-shadow:0 0 6px #93c5fd;
+  animation:dotPulse 2s ease-in-out infinite;
+}
+.orbit-dot:nth-child(4){ top:-2px; left:50%; transform:translateX(-50%); }
+.orbit-dot:nth-child(5){ bottom:-2px; left:50%; transform:translateX(-50%); animation-delay:0.6s; }
+.orbit-dot:nth-child(6){ left:-2px; top:50%; transform:translateY(-50%); animation-delay:1.1s; }
+.orbit-dot:nth-child(7){ right:-2px; top:50%; transform:translateY(-50%); animation-delay:0.4s; }
+@keyframes dotPulse { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
+
+/* 外层发光圆 */
+.glow-orb {
+  position:absolute; inset:36px; border-radius:50%;
+  background:radial-gradient(ellipse at center,
+    rgba(60,100,220,0.25) 0%,
+    rgba(30,50,160,0.12) 55%,
+    transparent 80%
+  );
+  border:1px solid rgba(96,165,250,0.22);
+}
+.glow-orb::before {
+  content:'';
+  position:absolute; inset:14px; border-radius:50%;
+  border:1px dashed rgba(96,165,250,0.1);
+  animation:orbitRot 8s linear infinite reverse;
+}
+
+/* 旋转外光环渐变 */
+.spin-halo {
+  position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(
+    rgba(96,165,250,0.5) 0deg,
+    rgba(129,140,248,0.3) 90deg,
+    rgba(196,181,253,0.1) 180deg,
+    rgba(96,165,250,0.5) 360deg
+  );
+  animation:orbitRot 5s linear infinite;
+  -webkit-mask:radial-gradient(ellipse at center, transparent 118px, black 120px);
+  mask:radial-gradient(ellipse at center, transparent 118px, black 120px);
+}
+
+/* ── 中心图标+标语（叠放在轨道圆中心） ── */
+.center-content {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+}
+
+/* 手机图标 */
+.icon-wrap {
+  position:relative;
+  animation:shakeLoop 2.4s ease-in-out infinite;
+}
+@keyframes shakeLoop {
+  0%,100%{ transform:rotate(0deg) translateY(0); }
+  15%{ transform:rotate(-9deg) translateY(-4px); }
+  30%{ transform:rotate(9deg) translateY(-6px); }
+  50%{ transform:rotate(-6deg) translateY(-3px); }
+  70%{ transform:rotate(5deg) translateY(-1px); }
+  85%{ transform:rotate(-2deg) translateY(0); }
+}
+
+/* 粒子 */
+.spark {
+  position:absolute; border-radius:50%;
+  background:rgba(147,197,253,0.85);
+  animation:sparkUp var(--spd,1.6s) ease-out infinite var(--d,0s);
+}
+@keyframes sparkUp {
+  0%{ opacity:0; transform:translate(0,0) scale(0); }
+  25%{ opacity:1; }
+  100%{ opacity:0; transform:translate(var(--tx,0px),var(--ty,-30px)) scale(0.2); }
+}
+
+/* 标语 */
+.shake-text {
+  text-align:center;
+}
+.shake-main {
+  font-size:16px; font-weight:700; letter-spacing:2px;
+  background:linear-gradient(90deg,#93c5fd,#c4b5fd);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:6px;
+}
+.shake-sub {
+  font-size:12px; color:rgba(147,197,253,0.5); letter-spacing:1px;
+}
+
+/* 呼吸点 */
+.dots { display:flex; gap:5px; justify-content:center; margin-top:8px; }
+.dot {
+  width:4px; height:4px; border-radius:50%;
+  background:rgba(96,165,250,0.5);
+  animation:dotBreath 1.4s ease-in-out infinite;
+}
+.dot:nth-child(2){ animation-delay:0.2s; }
+.dot:nth-child(3){ animation-delay:0.4s; }
+@keyframes dotBreath { 0%,100%{opacity:0.3;transform:scale(0.8);} 50%{opacity:1;transform:scale(1.2);} }
+
+/* ── 底部固定导航 ── */
+.nav-bar {
+  position:absolute; bottom:0; left:0; right:0;
+  height:100px; z-index:20;
+  background:rgba(8,4,20,0.9);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,0.06);
+  display:flex; align-items:flex-start; justify-content:space-around;
+  padding-top:14px;
+}
+.nav-item { display:flex; flex-direction:column; align-items:center; gap:0; cursor:pointer; position:relative; }
+.nav-txt { font-size:14px; color:rgba(255,255,255,0.45); font-weight:400; }
+.nav-item.on .nav-txt { color:#fff; font-weight:600; }
+.nav-dot { width:4px; height:4px; background:#93c5fd; border-radius:50%; margin-top:4px; box-shadow:0 0 6px #93c5fd; }
+.live-tag {
+  position:absolute; top:-4px; right:-12px;
+  background:#e8143a; color:#fff;
+  font-size:9px; font-weight:700;
+  padding:1px 5px; border-radius:6px;
+}
+.home-bar {
+  position:absolute; bottom:7px; left:50%; transform:translateX(-50%);
+  width:130px; height:4px;
+  background:rgba(255,255,255,0.2); border-radius:2px;
+}
+
+/* ── 进场动画 ── */
+@keyframes fadeUp {
+  from{ opacity:0; transform:translateY(16px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.center-stage { animation:fadeUp 0.5s ease both; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- 背景 -->
+  <div class="bg"></div>
+  <div class="nebula"></div>
+  <div class="stars-layer"></div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span class="s-time">09:41</span>
+    <div class="s-icons">
+      <div class="sig"><b></b><b></b><b></b><b></b></div>
+      <div class="wifi"></div>
+      <div class="bat"><div class="bat-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- 顶部标题 -->
+  <div class="page-header">
+    <div class="back-btn" onclick="location.href='今日运势主页.html'">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </div>
+    <div class="header-title">事业 · 学业</div>
+    <div class="header-sub">CAREER · STUDY</div>
+  </div>
+
+  <!-- ── 页面中央主体 ── -->
+  <div class="center-stage">
+
+    <!-- 星盘轨道圆 -->
+    <div class="orbit-wrap">
+      <!-- 旋转圆圈 -->
+      <div class="orbit-ring"></div>
+      <div class="orbit-ring"></div>
+      <div class="orbit-ring"></div>
+      <!-- 顶点光点 -->
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+      <!-- 发光底圆 -->
+      <div class="glow-orb"></div>
+      <!-- 旋转光晕 -->
+      <div class="spin-halo"></div>
+
+      <!-- 中心内容：图标 + 标语 -->
+      <div class="center-content">
+
+        <!-- 手机摇动图标 -->
+        <div class="icon-wrap" onclick="location.href='2摇一摇结果也.html'" style="cursor:pointer;">
+          <!-- 粒子 -->
+          <div class="spark" style="width:4px;height:4px;top:-6px;left:50%;--spd:1.6s;--d:0s;--tx:-10px;--ty:-26px;"></div>
+          <div class="spark" style="width:3px;height:3px;top:0;right:0;--spd:1.4s;--d:0.3s;--tx:12px;--ty:-20px;"></div>
+          <div class="spark" style="width:2px;height:2px;top:8px;left:2px;--spd:1.8s;--d:0.7s;--tx:-8px;--ty:-16px;"></div>
+          <div class="spark" style="width:3px;height:3px;bottom:4px;left:20%;--spd:1.5s;--d:1s;--tx:4px;--ty:-22px;"></div>
+          <div class="spark" style="width:2px;height:2px;bottom:0;right:20%;--spd:1.7s;--d:0.2s;--tx:-5px;--ty:-18px;"></div>
+
+          <!-- 手机SVG，透明半透明风格 -->
+          <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 左侧震动波 -->
+            <path d="M10 24 Q14 30 10 36 Q14 42 10 48" stroke="rgba(96,165,250,0.4)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M5 20 Q10 30 5 40 Q10 50 5 60" stroke="rgba(96,165,250,0.2)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <!-- 右侧震动波 -->
+            <path d="M62 24 Q58 30 62 36 Q58 42 62 48" stroke="rgba(96,165,250,0.4)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M67 20 Q62 30 67 40 Q62 50 67 60" stroke="rgba(96,165,250,0.2)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <!-- 手机外壳 -->
+            <rect x="20" y="6" width="32" height="60" rx="7" ry="7"
+              fill="rgba(96,165,250,0.07)"
+              stroke="rgba(147,197,253,0.6)"
+              stroke-width="1.5"/>
+            <!-- 听筒 -->
+            <rect x="28" y="11" width="16" height="2.5" rx="1.25"
+              fill="rgba(147,197,253,0.4)"/>
+            <!-- 屏幕 -->
+            <rect x="24" y="17" width="24" height="34" rx="3"
+              fill="rgba(96,165,250,0.1)"
+              stroke="rgba(147,197,253,0.2)"
+              stroke-width="1"/>
+            <!-- Home键 -->
+            <circle cx="36" cy="59" r="3"
+              fill="none"
+              stroke="rgba(147,197,253,0.45)"
+              stroke-width="1.2"/>
+            <!-- 屏幕内闪电 -->
+            <path d="M34 27 L38 22 L38 31 L42 31 L36 40 L36 31 L32 31 Z"
+              fill="rgba(147,197,253,0.65)"/>
+          </svg>
+        </div>
+
+        <!-- 文字标语 -->
+        <div class="shake-text">
+          <div class="shake-main">摇一摇，获得今日建议</div>
+          <div class="shake-sub">晃动手机，解锁专属运势指引</div>
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部导航已移除 -->
+
+  <div class="home-bar"></div>
+
+</div>
+
+</body>
+</html>

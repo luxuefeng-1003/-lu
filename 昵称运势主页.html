@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>今日运势 - 昵称测算</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#0a0a14; font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif; }
+
+.phone { width:390px; height:844px; position:relative; overflow:hidden; border-radius:50px; box-shadow:0 0 0 2px #2a2a2a, 0 0 0 4px #1a1a1a, 0 40px 100px rgba(0,0,0,0.9); }
+
+.page-bg { position:absolute; inset:0; z-index:0; background: radial-gradient(ellipse 200% 60% at 50% 0%, #2a0f5e 0%, transparent 60%), radial-gradient(ellipse 100% 40% at 80% 30%, #1a0a40 0%, transparent 50%), linear-gradient(180deg, #0d0620 0%, #10082a 30%, #0a0618 60%, #060412 100%); }
+.nebula { position:absolute; inset:0; z-index:1; pointer-events:none; background: radial-gradient(ellipse 180px 100px at 30% 18%, rgba(120,60,220,0.18) 0%, transparent 70%), radial-gradient(ellipse 120px 80px at 75% 12%, rgba(180,100,255,0.12) 0%, transparent 70%), radial-gradient(ellipse 80px 60px at 55% 8%, rgba(255,200,100,0.08) 0%, transparent 70%); }
+.stars-layer { position:absolute; inset:0; z-index:2; pointer-events:none; background-image: radial-gradient(1px 1px at 8% 6%, rgba(255,255,255,0.8) 0%, transparent 100%), radial-gradient(1.5px 1.5px at 22% 4%, rgba(255,230,150,0.9) 0%, transparent 100%), radial-gradient(1px 1px at 40% 9%, rgba(255,255,255,0.6) 0%, transparent 100%), radial-gradient(2px 2px at 60% 5%, rgba(200,180,255,0.7) 0%, transparent 100%), radial-gradient(1px 1px at 78% 11%, rgba(255,255,255,0.5) 0%, transparent 100%), radial-gradient(1.5px 1.5px at 90% 7%, rgba(255,230,150,0.6) 0%, transparent 100%), radial-gradient(1px 1px at 15% 22%, rgba(255,255,255,0.4) 0%, transparent 100%), radial-gradient(1px 1px at 88% 25%, rgba(255,255,255,0.5) 0%, transparent 100%), radial-gradient(2px 2px at 50% 3%, rgba(255,220,100,0.8) 0%, transparent 100%); }
+
+.scroll-content { position:absolute; inset:0; z-index:10; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding-bottom:24px; }
+.scroll-content::-webkit-scrollbar { display:none; }
+
+.status-bar { position:sticky; top:0; left:0; right:0; height:50px; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:14px 26px 0; background:linear-gradient(180deg, rgba(13,6,32,0.98) 0%, rgba(13,6,32,0) 100%); }
+.s-time { font-size:15px; font-weight:600; color:rgba(255,255,255,0.9); letter-spacing:0.2px; }
+.s-icons { display:flex; align-items:center; gap:5px; }
+.sig { display:flex; align-items:flex-end; gap:1.5px; height:11px; }
+.sig b { width:2.5px; background:rgba(255,255,255,0.85); border-radius:1px; display:block; }
+.sig b:nth-child(1){height:4px;} .sig b:nth-child(2){height:6.5px;} .sig b:nth-child(3){height:9px;} .sig b:nth-child(4){height:11px;}
+.wifi { position:relative; width:15px; height:11px; }
+.wifi::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:4px; height:4px; background:rgba(255,255,255,0.85); border-radius:50%; }
+.wifi::before { content:''; position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:11px; height:7px; border:2px solid rgba(255,255,255,0.85); border-bottom:none; border-radius:8px 8px 0 0; }
+.bat { display:flex; align-items:center; width:25px; height:12px; border:1.5px solid rgba(255,255,255,0.7); border-radius:3px; padding:2px; position:relative; }
+.bat::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,0.6); border-radius:0 1px 1px 0; }
+.bat-fill { background:rgba(255,255,255,0.85); border-radius:1px; height:100%; width:82%; }
+
+.tab-bar { display:flex; justify-content:space-between; align-items:center; padding:16px 16px 12px; border-bottom:none; }
+.top-btn { border:none; background:none; cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; }
+
+.hero-section { padding:24px 20px 16px; display:flex; align-items:center; gap:20px; }
+.star-emblem { flex-shrink:0; width:80px; height:80px; position:relative; }
+.star-emblem svg { width:100%; height:100%; }
+.hero-info { flex:1; }
+.hero-label { font-size:12px; font-weight:500; color:rgba(167,139,250,0.8); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+.hero-score { font-size:48px; font-weight:800; line-height:1; background:linear-gradient(135deg,#fff 30%,#c4b5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-desc { font-size:13px; color:rgba(255,255,255,0.5); margin-top:5px; }
+.hero-stars { display:flex; gap:3px; margin-top:6px; }
+.hero-stars svg { opacity:0.9; }
+
+.source-tag { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:rgba(52,211,153,0.85); background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.2); border-radius:20px; padding:4px 12px; margin-top:8px; flex-wrap:wrap; line-height:1.6; }
+.set-birth-btn { display:inline; background:none; border:none; color:#34d399; font-size:11px; font-weight:500; cursor:pointer; padding:0 4px; text-decoration:underline; }
+
+.metrics-card { margin:0 16px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:16px 18px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.3); }
+.metric-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.metric-row:last-child { margin-bottom:0; }
+.metric-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.metric-name { font-size:11px; color:rgba(255,255,255,0.7); font-weight:500; width:62px; flex-shrink:0; white-space:nowrap; }
+.metric-bar-bg { flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.08); overflow:visible; position:relative; }
+.metric-bar-fill { height:100%; border-radius:3px; position:relative; transition:width 0.8s ease; }
+.metric-bar-fill::after { content:''; position:absolute; right:-1px; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:50%; background:inherit; box-shadow:0 0 6px currentColor; }
+.bar-love { background:linear-gradient(90deg,#f87171,#fb923c); }
+.bar-career { background:linear-gradient(90deg,#60a5fa,#818cf8); }
+.bar-wealth { background:linear-gradient(90deg,#34d399,#10b981); }
+.metric-val { font-size:13px; font-weight:700; color:rgba(255,255,255,0.85); width:28px; text-align:right; flex-shrink:0; }
+
+.fortune-quote { margin:0 16px 14px; background:linear-gradient(135deg, rgba(120,60,200,0.2), rgba(60,20,120,0.15)); border:1px solid rgba(167,139,250,0.2); border-radius:16px; padding:14px 16px; position:relative; overflow:hidden; }
+.fortune-quote::before { content:'"'; position:absolute; top:-8px; left:10px; font-size:72px; font-weight:900; color:rgba(167,139,250,0.15); line-height:1; font-family:Georgia,serif; }
+.fortune-quote p { font-size:13.5px; color:rgba(255,255,255,0.75); line-height:1.75; position:relative; z-index:1; }
+
+.section-card { margin:0 16px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:14px 16px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.section-card:hover { border-color:rgba(255,255,255,0.12); }
+.sc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.sc-left { display:flex; align-items:center; gap:10px; }
+.sc-icon { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ic-love { background:linear-gradient(135deg,rgba(248,113,113,0.25),rgba(251,146,60,0.15)); }
+.ic-career { background:linear-gradient(135deg,rgba(96,165,250,0.25),rgba(129,140,248,0.15)); }
+.ic-wealth { background:linear-gradient(135deg,rgba(52,211,153,0.25),rgba(16,185,129,0.15)); }
+.sc-title { font-size:14px; font-weight:600; color:rgba(255,255,255,0.9); }
+.sc-score { font-size:20px; font-weight:800; background:linear-gradient(135deg,#fff,#c4b5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sc-body { font-size:13px; color:rgba(255,255,255,0.5); line-height:1.7; }
+.sc-ask { display:inline-flex; align-items:center; gap:4px; margin-top:8px; font-size:12px; font-weight:500; color:rgba(167,139,250,0.8); border:none; background:none; cursor:pointer; padding:4px 10px 4px 0; }
+.sc-ask svg { opacity:0.7; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="page-bg"></div>
+  <div class="nebula"></div>
+  <div class="stars-layer"></div>
+
+  <div class="scroll-content">
+    <div class="status-bar">
+      <span class="s-time">09:41</span>
+      <div class="s-icons">
+        <div class="sig"><b></b><b></b><b></b><b></b></div>
+        <div class="wifi"></div>
+        <div class="bat"><div class="bat-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="top-btn" onclick="location.href='0测算方式选择页.html'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span style="font-size:18px;font-weight:700;color:#fff;letter-spacing:2px;">✦ 今日运势 ✦</span>
+      <button class="top-btn" onclick="location.href='分享页.html'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </button>
+    </div>
+
+    <div class="hero-section">
+      <div class="star-emblem">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="sg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.3"/><stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/></radialGradient><linearGradient id="sl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e879f9"/><stop offset="50%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
+          <circle cx="40" cy="40" r="38" fill="url(#sg)"/>
+          <circle cx="40" cy="40" r="36" stroke="rgba(167,139,250,0.25)" stroke-width="1"/>
+          <polygon points="40,6 47.2,28.6 70.4,28.6 52.6,42.8 59.8,65.4 40,51.2 20.2,65.4 27.4,42.8 9.6,28.6 32.8,28.6" fill="none" stroke="url(#sl)" stroke-width="1.5" stroke-linejoin="round"/>
+          <polygon points="40,22 43.6,33.2 55.6,33.2 46.0,40.4 49.6,51.6 40,44.4 30.4,51.6 34.0,40.4 24.4,33.2 36.4,33.2" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.4)" stroke-width="1" stroke-linejoin="round"/>
+          <circle cx="40" cy="40" r="4" fill="#c4b5fd" opacity="0.9"/><circle cx="40" cy="40" r="7" fill="#a78bfa" opacity="0.25"/>
+          <circle cx="40" cy="6" r="1.5" fill="#e879f9" opacity="0.8"/><circle cx="70.4" cy="28.6" r="1.2" fill="#a78bfa" opacity="0.7"/><circle cx="59.8" cy="65.4" r="1.2" fill="#60a5fa" opacity="0.7"/><circle cx="20.2" cy="65.4" r="1.2" fill="#60a5fa" opacity="0.7"/><circle cx="9.6" cy="28.6" r="1.2" fill="#a78bfa" opacity="0.7"/>
+        </svg>
+      </div>
+      <div class="hero-info">
+        <div class="hero-label">综合运势</div>
+        <div class="hero-score">85</div>
+        <div class="hero-stars">
+          <svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="#a78bfa"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="#a78bfa"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="#a78bfa"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="#a78bfa"/></svg>
+        </div>
+        <div class="hero-desc">今日运势 · 2026年5月11日</div>
+        <div class="source-tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          当前结果依据用户昵称测算，生日测算结果更加精确，快来填写出生日期吧
+          <button class="set-birth-btn" onclick="location.href='生日设置页.html'">设置生日</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="metrics-card">
+      <div class="metric-row">
+        <div class="metric-icon" style="background:rgba(248,113,113,0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+        <div class="metric-name">爱情运</div>
+        <div class="metric-bar-bg"><div class="metric-bar-fill bar-love" style="width:90%"></div></div>
+        <div class="metric-val">90</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-icon" style="background:rgba(96,165,250,0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+        <div class="metric-name">学业/事业运</div>
+        <div class="metric-bar-bg"><div class="metric-bar-fill bar-career" style="width:75%"></div></div>
+        <div class="metric-val">75</div>
+      </div>
+      <div class="metric-row">
+        <div class="metric-icon" style="background:rgba(52,211,153,0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3"/></svg></div>
+        <div class="metric-name">财富运</div>
+        <div class="metric-bar-bg"><div class="metric-bar-fill bar-wealth" style="width:85%"></div></div>
+        <div class="metric-val">85</div>
+      </div>
+    </div>
+
+    <div class="fortune-quote">
+      <p>小鹿，你的名字里藏着独特的运势密码。今天保持好奇心，温柔的对待自己和身边的人，好运会悄悄靠近你。</p>
+    </div>
+
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-left">
+          <div class="sc-icon ic-love"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+          <div class="sc-title">爱情运</div>
+        </div>
+        <div class="sc-score">90</div>
+      </div>
+      <div class="sc-body">小鹿，你的昵称蕴含着美好的能量。今天爱情运势很棒，你可能会发现意想不到的惊喜。保持开放的心态，缘分就在不经意间降临。</div>
+      <button class="sc-ask" onclick="location.href='1塔罗抽卡玩法.html'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>问爱情运<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-left">
+          <div class="sc-icon ic-career"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+          <div class="sc-title">学业运 / 事业运</div>
+        </div>
+        <div class="sc-score">75</div>
+      </div>
+      <div class="sc-body">小鹿，今天适合稳扎稳打，目标已定就按部就班前进。保持耐心，好运终会降临到你身上。</div>
+      <button class="sc-ask" onclick="location.href='2摇一摇玩法.html'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>问学业事业运<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-left">
+          <div class="sc-icon ic-wealth"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3"/></svg></div>
+          <div class="sc-title">财富运</div>
+        </div>
+        <div class="sc-score">85</div>
+      </div>
+      <div class="sc-body">小鹿，今天你的财运不错！直觉判断力很好，适合审视财务规划。中长期策略更适合你。</div>
+      <button class="sc-ask" onclick="location.href='3抽卡玩法.html'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>问财富运<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+
+    <!-- 底部操作按钮 -->
+    <div style="padding:16px 16px 32px;display:flex;gap:10px;">
+      <button style="flex:1;height:50px;border:none;border-radius:14px;cursor:pointer;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7c3aed,#a855f7,#c026d3);box-shadow:0 4px 28px rgba(124,58,237,0.5);letter-spacing:0.3px;position:relative;overflow:hidden;">
+        <span style="position:relative;z-index:1;">✦ 制作运势视频</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
